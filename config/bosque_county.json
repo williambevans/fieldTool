@@ -1,0 +1,241 @@
+{
+  "region": {
+    "name": "Bosque County",
+    "state": "Texas",
+    "county_seat": "Meridian",
+    "population": 18808,
+    "area_sq_miles": 1003,
+    "established": 1854
+  },
+  "geography": {
+    "boundaries": {
+      "north_lat": 32.10,
+      "south_lat": 31.65,
+      "east_lon": -97.40,
+      "west_lon": -98.00
+    },
+    "center": {
+      "latitude": 31.8749,
+      "longitude": -97.6428,
+      "location": "Meridian, TX"
+    },
+    "elevation_range": {
+      "min_feet": 500,
+      "max_feet": 1200,
+      "avg_feet": 850
+    }
+  },
+  "water_resources": {
+    "brazos_river": {
+      "approximate_coords": {
+        "latitude": 31.8500,
+        "longitude": -97.6000
+      },
+      "description": "Major water resource flowing through Bosque County",
+      "length_in_county_miles": 45,
+      "uses": ["irrigation", "cooling", "recreation"],
+      "flow_rate": "Variable - seasonal",
+      "water_rights": "Contact TCEQ for rights and permits"
+    },
+    "lakes": [
+      {
+        "name": "Lake Whitney",
+        "type": "Reservoir",
+        "latitude": 31.9500,
+        "longitude": -97.3833,
+        "surface_area_acres": 23560,
+        "purpose": "Flood control, water supply, recreation"
+      }
+    ],
+    "groundwater": {
+      "aquifers": ["Trinity Aquifer", "Edwards-Trinity Aquifer"],
+      "depth_range_feet": "200-800",
+      "quality": "Generally good for irrigation and cooling"
+    }
+  },
+  "energy_infrastructure": {
+    "utility_territory": {
+      "provider": "Oncor Electric Delivery",
+      "type": "Transmission & Distribution",
+      "grid": "ERCOT",
+      "service_area": "North and Central Texas",
+      "website": "https://www.oncor.com"
+    },
+    "transmission_lines": {
+      "voltage_levels": ["69kV", "138kV", "345kV"],
+      "major_corridors": [
+        "North-South 345kV corridor (eastern county)",
+        "East-West 138kV lines"
+      ],
+      "interconnection_note": "Contact Oncor for available capacity and queue"
+    },
+    "substations": [
+      {
+        "name": "Meridian Substation",
+        "approximate_location": "Near Meridian",
+        "voltage": "138kV/69kV",
+        "note": "Verify capacity with Oncor"
+      },
+      {
+        "name": "Clifton Area Substations",
+        "approximate_location": "Eastern Bosque County",
+        "voltage": "138kV",
+        "note": "Multiple substations in area"
+      }
+    ],
+    "solar_potential": {
+      "avg_peak_sun_hours": 5.0,
+      "capacity_factor_range": "18-22%",
+      "optimal_tilt_angle": 30,
+      "azimuth": 180,
+      "shading_concerns": "Minimal - open terrain"
+    },
+    "wind_potential": {
+      "resource_class": "Class 2-3 (marginal)",
+      "avg_wind_speed_mph": "12-14",
+      "viability": "Better suited for solar than wind"
+    }
+  },
+  "telecommunications": {
+    "fiber_availability": "Limited in rural areas",
+    "providers": [
+      "Consolidated Communications",
+      "Verizon",
+      "AT&T"
+    ],
+    "note": "Verify fiber availability for specific locations - critical for data centers",
+    "recommendations": "Contact providers early in site selection"
+  },
+  "land_use": {
+    "primary_uses": [
+      "Agriculture",
+      "Ranching",
+      "Rural residential"
+    ],
+    "agricultural_products": [
+      "Cattle",
+      "Hay",
+      "Wheat",
+      "Corn"
+    ],
+    "typical_parcel_sizes_acres": "40-640",
+    "zoning_note": "Agricultural zoning typical - verify with county for commercial energy projects"
+  },
+  "climate": {
+    "zone": "Humid Subtropical",
+    "ashrae_zone": "2A (Hot-Humid)",
+    "avg_temp_summer_f": 95,
+    "avg_temp_winter_f": 55,
+    "annual_rainfall_inches": 32,
+    "cooling_degree_days": 2800,
+    "heating_degree_days": 2200,
+    "notes": "Hot summers require robust cooling for data centers"
+  },
+  "economic_development": {
+    "property_taxes": {
+      "note": "Tax abatements may be available for large economic development projects",
+      "contact": "Bosque County Economic Development Corporation"
+    },
+    "incentives": [
+      "Texas Enterprise Fund (potential)",
+      "Texas Economic Development Act (Chapter 313 - being phased out)",
+      "Local property tax abatements",
+      "Freeport exemption for certain equipment"
+    ],
+    "workforce": {
+      "size": "Limited - rural county",
+      "proximity_to_labor": "Waco (35 miles), Fort Worth (65 miles)",
+      "recommendations": "Plan for commuting workforce or housing"
+    }
+  },
+  "transportation": {
+    "highways": [
+      "State Highway 6 (major north-south route)",
+      "State Highway 22",
+      "Farm-to-Market roads"
+    ],
+    "rail_access": "Limited - nearest major rail in Waco",
+    "airports": {
+      "nearest_commercial": "Waco Regional Airport (ACT) - 35 miles",
+      "nearest_major": "Dallas/Fort Worth International (DFW) - 90 miles"
+    }
+  },
+  "regulatory_considerations": {
+    "building_permits": "Bosque County Planning & Development",
+    "environmental": {
+      "agencies": ["TCEQ (Texas Commission on Environmental Quality)"],
+      "considerations": [
+        "Stormwater management",
+        "Air quality (minimal for solar/DC)",
+        "Water discharge permits (if applicable)"
+      ]
+    },
+    "electrical_permits": "Oncor interconnection agreement required",
+    "land_use": "County commissioners court - verify zoning compliance"
+  },
+  "opportunities": {
+    "solar_farms": {
+      "viability": "Excellent",
+      "strengths": [
+        "Abundant land availability",
+        "Good solar resource",
+        "Oncor transmission access",
+        "Lower land costs than urban areas"
+      ],
+      "challenges": [
+        "Verify transmission capacity",
+        "Interconnection queue timing",
+        "Community acceptance (engage early)"
+      ]
+    },
+    "data_centers": {
+      "viability": "Moderate",
+      "strengths": [
+        "Lower land costs",
+        "Water access (Brazos River)",
+        "Power availability (Oncor)",
+        "Tax incentive potential"
+      ],
+      "challenges": [
+        "Fiber connectivity - CRITICAL",
+        "Distance from major markets",
+        "Workforce availability",
+        "Cooling costs (hot climate)"
+      ],
+      "recommendations": [
+        "Verify fiber before site selection",
+        "Consider edge computing vs hyperscale",
+        "Plan robust cooling systems",
+        "Engage with county early"
+      ]
+    }
+  },
+  "contacts": {
+    "county_government": {
+      "name": "Bosque County Courthouse",
+      "address": "110 S Main St, Meridian, TX 76665",
+      "phone": "(254) 435-2201"
+    },
+    "economic_development": {
+      "name": "Bosque County EDC",
+      "note": "Contact county for current EDC information"
+    },
+    "utility": {
+      "name": "Oncor Electric Delivery",
+      "phone": "1-888-313-4747",
+      "website": "https://www.oncor.com",
+      "interconnection": "Submit interconnection request through Oncor portal"
+    },
+    "appraisal_district": {
+      "name": "Bosque County Appraisal District",
+      "phone": "(254) 435-2604",
+      "services": "Property valuations, tax information"
+    }
+  },
+  "metadata": {
+    "created": "2026-01-10",
+    "version": "1.0",
+    "source": "HH Holdings / Bevans Real Estate research",
+    "notes": "Data compiled from public sources and field experience. Verify all information with official sources before making business decisions."
+  }
+}
