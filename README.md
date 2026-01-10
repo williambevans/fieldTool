@@ -3,19 +3,27 @@
 
 Professional mobile field analysis tool for Texas energy infrastructure development. Built by Bevans Real Estate with 14+ years of Texas property research expertise.
 
-**🚀 [Live Demo](https://williambevans.github.io/fieldTool/)** | **Deployed on GitHub Pages**
+**Owner:** Biri Bevan | **Company:** HH Holdings / Bevans Real Estate | **Location:** Bosque County, Texas (Brazos River Region)
+
+**🚀 [Live Web Demo](https://williambevans.github.io/fieldTool/)** | **Deployed on GitHub Pages**
+
+---
 
 ## ✨ Features
 
-- 📍 **Real-time GPS site capture and analysis** - Accurate location tracking with geolocation API
-- ☀️ **Solar farm capacity calculations** - NREL methodology for solar PV systems
-- 🏢 **Data center power requirement modeling** - PUE-based power consumption analysis
-- 💾 **Site database with JSON/CSV export** - LocalStorage persistence for offline work
-- 🗺️ **Bosque County infrastructure context** - Regional data integration
-- ⚡ **Oncor territory mapping** - Power transmission corridor analysis
-- 🌊 **Brazos River proximity analysis** - Hydrological considerations
-- 📱 **Mobile-first responsive design** - Works on Android, iOS, and desktop browsers
-- 🔧 **Termux compatible** - Run natively on Android with Termux
+### Core Capabilities
+- 📍 **Real-time GPS** - Precise site location capture (termux-location API on CLI, geolocation API on web)
+- ☀️ **Solar Farm Analysis** - NREL-based capacity and generation calculations
+- 🖥️ **Data Center Modeling** - Power requirements, PUE, and facility sizing
+- 💾 **Site Database** - JSON storage with search and CSV export capabilities
+- 🗺️ **Bosque County Context** - Local infrastructure and utility data integration
+- ⚡ **Oncor Territory** - Electric utility mapping and interconnection info
+- 🌊 **Brazos River Analysis** - Water proximity for cooling requirements
+- 📊 **Economic Estimates** - CAPEX, O&M, and revenue projections
+
+### Two Implementations
+1. **Web Version** - Mobile-first responsive design, works in any browser
+2. **Termux CLI** - Native Android command-line tool with advanced GPS
 
 ## 🎯 Perfect For
 
@@ -24,132 +32,380 @@ Professional mobile field analysis tool for Texas energy infrastructure developm
 - Solar farm site scouts
 - Data center location analysts
 - Agricultural land conversion analysis
+- Property research and due diligence
+- Client presentations and field reports
 - Field research teams
+
+---
 
 ## 🛠️ Installation & Setup
 
-### Option 1: Web Browser (Recommended for MVP)
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/williambevans/fieldTool.git
-   cd fieldTool
-   ```
-2. Open `index.html` in your browser (or use a local server):
-   ```bash
-   python3 -m http.server 8000
-   # Visit http://localhost:8000
-   ```
+### Option 1: Web Browser (Recommended for Quick Start)
 
-### Option 2: GitHub Pages (Already Deployed)
-Visit: https://williambevans.github.io/fieldTool/
+**GitHub Pages (Already Deployed):**
+Visit: **https://williambevans.github.io/fieldTool/**
 
-### Option 3: Termux on Android
-1. Install Termux from F-Droid
-2. Clone repo and serve:
-   ```bash
-   pkg install python3
-   git clone https://github.com/williambevans/fieldTool.git
-   cd fieldTool
-   python3 -m http.server 8000
-   ```
-3. Access via `http://localhost:8000` in your phone's browser
+**Local Development:**
+```bash
+git clone https://github.com/williambevans/fieldTool.git
+cd fieldTool
+python3 -m http.server 8000
+# Visit http://localhost:8000
+```
 
-## 📊 Core Functionality
+### Option 2: Termux CLI on Android (Advanced Field Use)
 
-### GPS Capture
-- Real-time geolocation with accuracy radius
-- Automatic coordinate population
-- GPS status indicator
+**Prerequisites:**
+1. **Termux** from F-Droid: https://f-droid.org/packages/com.termux/
+2. **Termux:API** from F-Droid: https://f-droid.org/packages/com.termux.api/
 
-### Solar Farm Calculator
-- Acreage-based capacity estimation
-- Panel efficiency adjustments (default 18%)
-- System loss factor (default 14%)
-- Annual generation MWh projections
-- NREL standard: ~1.4 acres per MW
+**Installation:**
+```bash
+# Clone repository
+cd ~
+git clone https://github.com/williambevans/fieldTool.git
+cd fieldTool
 
-### Data Center Power Modeling
-- Building square footage input
-- PUE (Power Usage Effectiveness) rating
-- CPU density calculations
-- Peak load and monthly consumption estimates
+# Run setup script
+bash setup-eagle.sh
 
-### Site Database
-- Save/edit/delete site records
-- Full localStorage persistence
-- Field metadata capture
-- JSON export per site
-- CSV export for all sites
+# Launch EAGLE CLI
+energy-intel
+```
+
+Or use the short alias: `eagle`
+
+**First Run (Termux):**
+1. Grant storage and location permissions when prompted
+2. Select option 1 to capture GPS location (requires outdoor use)
+3. Select option 2 or 3 to analyze a site
+4. Save your analysis to the database
+
+---
+
+## 📊 Usage Examples
+
+### Web Version
+1. Open the app at https://williambevans.github.io/fieldTool/
+2. Allow GPS permission (popup will ask)
+3. Enter field details: Name, ID, acreage
+4. Select analysis type: Solar, Data Center, or Both
+5. Review calculated results (auto-calculated)
+6. Save to database (stored in browser localStorage)
+7. Export data as JSON or CSV
+
+### Termux CLI - Solar Farm Analysis
+
+```
+👉 Enter choice: 2
+
+📝 Site name: Meridian Ranch Solar
+📏 Land area (acres): 150
+📍 Capture GPS location? (y/n): y
+
+🛰️  Acquiring GPS signal...
+✅ GPS LOCK ACQUIRED!
+📍 31.874900°N, -97.642800°W (±12.5m)
+🌊 Brazos River: 4.2 miles
+
+☀️  SOLAR FARM ANALYSIS
+   Installed Capacity:   75.00 MW
+   Annual Generation:    131,400 MWh/year
+   Homes Powered:        11,945 Texas homes/year
+   Est. CAPEX:          $75,000,000
+
+💵 REVENUE POTENTIAL (at $0.03/kWh)
+   Annual Revenue:      $3,942,000
+
+💾 Save this site to database? (y/n): y
+✅ Site saved! ID: HH-20260110-143022
+```
+
+### Termux CLI - Data Center Analysis
+
+```
+👉 Enter choice: 3
+
+📝 Site name: Bosque Edge Data Center
+🔧 Analysis Method: 1 (by server count)
+⚡ PUE: 2 (Good - 1.5)
+🖥️  Number of servers: 1000
+
+🖥️  DATA CENTER ANALYSIS
+   Total Facility Power:  750.0 kW (0.75 MW)
+   Annual Consumption:    6,570 MWh/year
+   Electricity Cost:      $525,600/year
+   Building Size:         187,500 sq ft
+   Total Site:            12.9 acres
+
+💧 Water Cooling: 2.5 GPM / 1.3M gallons/year
+
+💾 Save this site to database? (y/n): y
+✅ Site saved!
+```
+
+---
 
 ## 📁 Project Structure
 
+### Web Version
 ```
 fieldTool/
 ├── index.html          # Main web interface
 ├── app.js              # Core application logic
 ├── styles.css          # Styling (embedded in HTML)
-├── README.md           # This file
-├── .gitignore          # Git ignore rules
 └── data/               # Optional data files
     └── sites.json      # Site database backup
 ```
 
-## 🔧 Technical Stack
+### Termux CLI Version
+```
+fieldTool/
+├── setup-eagle.sh                 # Termux installation script
+├── src/
+│   ├── energy-intel-eagle.py     # Main application
+│   ├── gps_utils.py               # GPS functions (termux-location)
+│   ├── solar_calc.py              # Solar farm calculations
+│   ├── datacenter_calc.py         # Data center power modeling
+│   └── site_manager.py            # JSON database management
+├── config/
+│   └── bosque_county.json         # Local infrastructure data
+├── docs/
+│   └── USER_GUIDE.md              # Comprehensive user documentation
+└── tests/
+    └── test_calculations.py       # Unit tests for validation
+```
 
+### Data Storage
+
+**Web Version:** Browser localStorage with JSON/CSV export
+
+**Termux CLI:** File-based storage at:
+```
+~/storage/shared/EnergyIntel/hh_holdings_sites.json
+```
+
+Accessible from:
+- Termux
+- Android file manager
+- Desktop (via USB or cloud sync)
+
+---
+
+## 🔧 Technical Details
+
+### Web Version Stack
 - **Frontend:** HTML5, CSS3, Vanilla JavaScript
-- **Storage:** Browser LocalStorage (no backend required)
+- **Storage:** Browser LocalStorage
 - **Geolocation:** HTML5 Geolocation API
 - **Export:** JSON, CSV
 - **Deployment:** GitHub Pages (static)
-- **Mobile:** Responsive design + Android Termux compatibility
 
-## 📈 Calculation Methodologies
+### Termux CLI Stack
+- **Language:** Python 3
+- **GPS:** termux-location API (high-precision)
+- **Storage:** JSON file system
+- **Platform:** Termux on Android 7.0+
 
-### Solar Capacity (NREL)
+### Solar Calculations (Both Versions)
+
+**Termux CLI (NREL-based):**
+- **Methodology:** NREL-based for Central Texas
+- **Capacity:** 0.5 MW per acre (ground-mount)
+- **Capacity Factor:** 20% (conservative for region)
+- **System Losses:** 14% (inverter, wiring, soiling)
+- **Home Consumption:** 11 MWh/year (Texas average)
+
+**Web Version:**
 ```
 Capacity (MW) = Acreage × 0.71 × Panel Efficiency × (1 - System Losses)
 Annual Generation (MWh) = Capacity (MW) × 1.15
 ```
 *1.15 MWh/MW/year is Texas average annual insolation*
 
-### Data Center Power
+### Data Center Calculations
+
+**Termux CLI:**
+- **Server Power:** 500W typical, 1000W high-performance
+- **PUE Options:** 1.2 (excellent) to 2.0+ (legacy)
+- **Cooling Load:** 40% of IT load (Texas climate)
+- **Land Requirements:** ~250 sq ft per kW
+- **Water Cooling:** 0.5 GPM per 100kW IT load
+
+**Web Version:**
 ```
 Total Power (kW) = Building Size (sqft) × CPU Density (W/sqft) × PUE / 1000
 Monthly Consumption (MWh) = Peak Load (MW) × 730 hours
 ```
 
-## 💾 Data Persistence
+### GPS Functionality
 
-All site data is stored in browser localStorage. Export data as:
-- **JSON** - Single site detailed export
-- **CSV** - All sites tabular export
+**Termux CLI:**
+- **Provider:** termux-location API
+- **Accuracy:** High-precision mode (outdoor use)
+- **Bosque County Bounds:** 31.65-32.10°N, 97.40-98.00°W
+- **Distance Calc:** Haversine formula for accuracy
+- **Brazos River:** Reference point for water access
+
+**Web Version:**
+- **Provider:** HTML5 Geolocation API
+- **Accuracy:** Device-dependent
+- **Real-time:** Automatic coordinate population
+
+---
+
+## 🧪 Testing
+
+### Termux CLI Test Suite
+
+Run the test suite to validate calculations:
+
+```bash
+cd ~/fieldTool/tests
+python test_calculations.py
+```
+
+Tests include:
+- Solar capacity and generation calculations
+- Data center power requirements
+- GPS distance calculations
+- Bosque County boundary checks
+- Revenue and economic estimates
+
+---
+
+## 📖 Documentation
+
+- **USER_GUIDE.md** - Comprehensive Termux CLI user manual with examples
+- **bosque_county.json** - Local infrastructure reference data
+- **Inline comments** - Detailed code documentation
+- **Web Interface** - Built-in help and tooltips
+
+---
+
+## 🌍 Use Cases
+
+### Solar Farm Development
+1. Scout potential sites in the field
+2. Capture GPS coordinates
+3. Calculate capacity based on acreage
+4. Estimate revenue at various PPA rates
+5. Save site data for desktop analysis
+6. Export to CSV for client presentations
+
+### Data Center Site Selection
+1. Evaluate power requirements
+2. Calculate facility size and land needs
+3. Assess water availability (Brazos River)
+4. Verify Oncor territory and capacity
+5. Compare multiple site options
+6. Generate economic projections
+
+### Property Research
+1. Build database of analyzed properties
+2. Track sites across Bosque County
+3. Document infrastructure access
+4. Calculate development potential
+5. Export data for reports
+6. Share findings with clients
+
+---
+
+## 🗺️ Bosque County Context
+
+### Utility Territory
+- **Provider:** Oncor Electric Delivery
+- **Grid:** ERCOT (Texas grid)
+- **Transmission:** 69kV, 138kV, 345kV lines available
+- **Interconnection:** Contact Oncor for capacity and queue
+
+### Water Resources
+- **Brazos River:** Major water resource through county
+- **Lake Whitney:** 23,560 acre reservoir
+- **Groundwater:** Trinity and Edwards-Trinity aquifers
+- **Uses:** Irrigation, cooling, recreation
+
+### Development Factors
+- **Land Availability:** Large parcels (40-640 acres typical)
+- **Land Use:** Agricultural zoning (verify for commercial)
+- **Workforce:** Limited locally, commute from Waco/Fort Worth
+- **Incentives:** Property tax abatements, state programs
+- **Fiber:** Limited in rural areas - VERIFY for data centers
+
+---
 
 ## 🚀 Deployment Status
 
-✅ **Live on GitHub Pages**: https://williambevans.github.io/fieldTool/
+✅ **Web Version Live**: https://williambevans.github.io/fieldTool/
 
-### Deploy Updates
+### Deploy Web Updates
 1. Push to `main` branch
 2. GitHub Actions automatically builds and deploys
 3. Live within 1-2 minutes
 
-## 📝 Usage Example
+### Termux CLI Updates
+- Pull latest from repository: `git pull`
+- Re-run setup if needed: `bash setup-eagle.sh`
 
-1. **Open the app** at live link or locally
-2. **Allow GPS permission** (popup will ask)
-3. **Enter field details**: Name, ID, acreage
-4. **Select analysis type**: Solar, Data Center, or Both
-5. **Review calculated results** (auto-calculated)
-6. **Save to database** (stored locally)
-7. **Export data** as JSON or CSV
+---
+
+## 🔮 Future Enhancements
+
+Planned features for future versions:
+
+- [ ] NREL Solar API integration (live data)
+- [ ] Oncor substation proximity API
+- [ ] Texas CAD data integration
+- [ ] PDF report generation
+- [ ] Desktop sync application
+- [ ] Satellite imagery overlay
+- [ ] Transmission line proximity maps
+- [ ] Water rights database integration
+- [ ] Multi-site comparison tool
+- [ ] Wind resource assessment
+- [ ] Battery storage calculations
+- [ ] Mobile app (native iOS/Android)
+
+---
+
+## 💬 Support
+
+**Owner:** Biri Bevan - 14+ years Texas property research expertise
+**Company:** HH Holdings / Bevans Real Estate
+**Location:** Bosque County, Texas (Brazos River Region)
+
+**GitHub:** https://github.com/williambevans/fieldTool
+**Issues:** Report bugs and request features via GitHub Issues
+**Documentation:** See `docs/USER_GUIDE.md` for Termux CLI details
+
+---
 
 ## 🤝 Contributing
 
-Issues and PRs welcome. This is a rapidly evolving project.
+Issues and PRs welcome. This is a rapidly evolving project with both web and CLI implementations.
 
-## 📍 Location & Company
+---
 
-- **Built for:** Termux (Android) | Web Browsers
-- **Location:** Bosque County, Texas
-- **Company:** HH Holdings / Bevans Real Estate
-- **Domain:** Texas energy infrastructure analysis
+## 📄 License
+
+MIT License - See LICENSE file for details
+
+Copyright (c) 2026 HH Holdings / Bevans Real Estate
+
+---
+
+## 🙏 Acknowledgments
+
+- **NREL (National Renewable Energy Laboratory)** - Solar methodology
+- **Termux Project** - Android Linux environment
+- **F-Droid** - Open source app distribution
+- **Oncor Electric Delivery** - Texas utility infrastructure
+- **Bosque County, Texas** - Local market expertise
+
+---
+
+**🦅 EAGLE - Soaring Above the Energy Frontier 🦅**
+
+*Built with Texas property expertise | Designed for field professionals | Powered by open source*
+
+**HH Holdings / Bevans Real Estate | Bosque County, Texas**
