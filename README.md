@@ -5,25 +5,25 @@ Professional mobile field analysis tool for Texas energy infrastructure developm
 
 **Owner:** Biri Bevan | **Company:** HH Holdings / Bevans Real Estate | **Location:** Bosque County, Texas (Brazos River Region)
 
-**🚀 [Live Web Demo](https://williambevans.github.io/fieldTool/)** | **Deployed on GitHub Pages**
+**🚀 [Live Web App](https://williambevans.github.io/fieldTool/)** | **⭐ [Termux CLI Version](#option-2-termux-cli-on-android-advanced-gps)**
 
 ---
 
 ## ✨ Features
 
-### Core Capabilities
-- 📍 **Real-time GPS** - Precise site location capture (termux-location API on CLI, geolocation API on web)
+### Core Capabilities (Both Versions - Production Ready)
+- 📍 **Real-time GPS** - HTML5 Geolocation (web) or termux-location (CLI) for precise site capture
 - ☀️ **Solar Farm Analysis** - NREL-based capacity and generation calculations
 - 🖥️ **Data Center Modeling** - Power requirements, PUE, and facility sizing
-- 💾 **Site Database** - JSON storage with search and CSV export capabilities
+- 💾 **Site Database** - localStorage (web) or JSON files (CLI) with CSV export
 - 🗺️ **Bosque County Context** - Local infrastructure and utility data integration
 - ⚡ **Oncor Territory** - Electric utility mapping and interconnection info
 - 🌊 **Brazos River Analysis** - Water proximity for cooling requirements
 - 📊 **Economic Estimates** - CAPEX, O&M, and revenue projections
 
-### Two Implementations
-1. **Web Version** - Mobile-first responsive design, works in any browser
-2. **Termux CLI** - Native Android command-line tool with advanced GPS
+### Two Production-Ready Implementations
+1. **Web Version** 🚀 - Works in any browser, mobile-responsive, instant access
+2. **Termux CLI** ⭐ - Native Android app with high-precision GPS for field use
 
 ## 🎯 Perfect For
 
@@ -40,10 +40,28 @@ Professional mobile field analysis tool for Texas energy infrastructure developm
 
 ## 🛠️ Installation & Setup
 
-### Option 1: Web Browser (Recommended for Quick Start)
+### Option 1: Web Browser (Instant Access) 🚀 RECOMMENDED
 
-**GitHub Pages (Already Deployed):**
+**Production-ready web application - works on any device with a browser**
+
+**Live Demo:**
 Visit: **https://williambevans.github.io/fieldTool/**
+
+**Features:**
+- ✅ Full solar farm analysis with NREL methodology
+- ✅ Complete data center power calculations
+- ✅ GPS location capture (HTML5 Geolocation)
+- ✅ Site database with localStorage persistence
+- ✅ JSON and CSV export
+- ✅ Mobile-responsive design
+- ✅ Works offline after first load
+- ✅ No installation required
+
+**Usage:**
+1. Open the link in any browser (Chrome, Safari, Firefox, Edge)
+2. Grant location permission when prompted (for GPS features)
+3. Start analyzing solar farms and data centers immediately
+4. Data persists in browser storage
 
 **Local Development:**
 ```bash
@@ -53,7 +71,9 @@ python3 -m http.server 8000
 # Visit http://localhost:8000
 ```
 
-### Option 2: Termux CLI on Android (Advanced Field Use)
+### Option 2: Termux CLI on Android (Advanced GPS) ⭐
+
+**Native Android command-line tool with high-precision GPS for field work**
 
 **Prerequisites:**
 1. **Termux** from F-Droid: https://f-droid.org/packages/com.termux/
@@ -75,7 +95,13 @@ energy-intel
 
 Or use the short alias: `eagle`
 
-**First Run (Termux):**
+**Features:**
+- ✅ High-precision GPS with termux-location API
+- ✅ File-based JSON database (shareable across devices)
+- ✅ Command-line interface for terminal users
+- ✅ Same calculation methodology as web version
+
+**First Run:**
 1. Grant storage and location permissions when prompted
 2. Select option 1 to capture GPS location (requires outdoor use)
 3. Select option 2 or 3 to analyze a site
