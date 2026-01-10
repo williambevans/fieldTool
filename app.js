@@ -1,0 +1,1 @@
+complete GPS capture system, solar farm capacity calculator using NREL methodology, data center power requirement modeling, site database management with localStorage persistence, and JSON export functionality for the EAGLE field analysis tool
