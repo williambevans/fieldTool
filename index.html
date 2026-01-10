@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EAGLE Field Analysis Tool</title>
+    <meta name="description" content="HH Holdings Energy Infrastructure Intelligence - Mobile field analysis tool for solar farms and data centers">
+    <title>EAGLE - HH Holdings Energy Intel</title>
     <style>
         * {
             margin: 0;
@@ -11,452 +12,607 @@
             box-sizing: border-box;
         }
 
+        :root {
+            --primary: #667eea;
+            --primary-dark: #5568d3;
+            --secondary: #764ba2;
+            --success: #48bb78;
+            --danger: #f56565;
+            --warning: #ed8936;
+            --dark: #2d3748;
+            --light: #f7fafc;
+            --border: #e2e8f0;
+        }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
             min-height: 100vh;
             padding: 20px;
+            color: var(--dark);
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
         }
 
+        /* Header */
         header {
             background: white;
             padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
             margin-bottom: 30px;
             text-align: center;
         }
 
         header h1 {
-            color: #333;
             font-size: 2.5em;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             margin-bottom: 10px;
         }
 
-        header p {
+        header .subtitle {
             color: #666;
             font-size: 1.1em;
+            margin-bottom: 5px;
         }
 
-        .main-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin-bottom: 20px;
+        header .company {
+            color: #888;
+            font-size: 0.95em;
         }
 
-        .card {
+        /* Navigation Tabs */
+        .tabs {
             background: white;
-            border-radius: 10px;
-            padding: 25px;
+            border-radius: 12px;
+            padding: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
+        .tab-button {
+            flex: 1;
+            padding: 15px 20px;
+            border: none;
+            background: var(--light);
+            color: var(--dark);
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .tab-button:hover {
+            background: var(--border);
+        }
+
+        .tab-button.active {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+        }
+
+        /* Cards */
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
         .card h2 {
-            color: #667eea;
-            margin-bottom: 15px;
+            color: var(--primary);
+            margin-bottom: 20px;
             font-size: 1.5em;
-            border-bottom: 2px solid #667eea;
+            border-bottom: 3px solid var(--primary);
             padding-bottom: 10px;
         }
 
+        /* Form Elements */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
         .form-group {
-            margin-bottom: 15px;
+            margin-bottom: 20px;
         }
 
         label {
             display: block;
-            margin-bottom: 5px;
-            color: #333;
-            font-weight: 500;
+            margin-bottom: 8px;
+            color: var(--dark);
+            font-weight: 600;
+            font-size: 0.95em;
         }
 
-        input[type="text"],
-        input[type="number"],
-        input[type="date"],
-        input[type="time"],
-        select,
-        textarea {
+        input, select, textarea {
             width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
+            padding: 12px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
             font-size: 1em;
             font-family: inherit;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
 
         textarea {
             resize: vertical;
-            min-height: 80px;
+            min-height: 100px;
         }
 
-        input:focus,
-        select:focus,
-        textarea:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 5px rgba(102, 126, 234, 0.3);
+        /* Buttons */
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
         }
 
         button {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 12px 24px;
+            padding: 14px 28px;
             border: none;
-            border-radius: 5px;
+            border-radius: 8px;
             font-size: 1em;
             font-weight: 600;
             cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-        }
-
-        button:active {
-            transform: translateY(0);
-        }
-
-        .button-group {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-        }
-
-        .button-group button {
+            transition: all 0.3s;
             flex: 1;
+            min-width: 150px;
         }
 
-        .button-secondary {
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
             background: #6c757d;
+            color: white;
         }
 
-        .button-secondary:hover {
+        .btn-secondary:hover {
             background: #5a6268;
         }
 
-        .map-container {
-            grid-column: 1 / -1;
-            background: white;
-            border-radius: 10px;
-            padding: 25px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        .btn-success {
+            background: var(--success);
+            color: white;
         }
 
-        .map-placeholder {
-            width: 100%;
-            height: 400px;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            border-radius: 5px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #666;
-            font-size: 1.1em;
+        .btn-gps {
+            background: #3182ce;
+            color: white;
         }
 
-        .results-container {
-            grid-column: 1 / -1;
-            background: white;
-            border-radius: 10px;
+        /* Results Display */
+        .results {
+            background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+            border-radius: 12px;
             padding: 25px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+        }
+
+        .results h3 {
+            color: var(--primary);
+            margin-bottom: 20px;
+            font-size: 1.3em;
         }
 
         .results-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 15px;
-            margin-top: 15px;
         }
 
         .result-item {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 5px;
-            border-left: 4px solid #667eea;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid var(--primary);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         }
 
         .result-label {
             color: #666;
             font-size: 0.9em;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .result-value {
-            color: #333;
-            font-size: 1.3em;
-            font-weight: 600;
+            color: var(--dark);
+            font-size: 1.5em;
+            font-weight: 700;
         }
 
+        /* GPS Status */
+        .gps-status {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .gps-status.acquiring {
+            background: #fef5e7;
+            border-left: 4px solid var(--warning);
+        }
+
+        .gps-status.success {
+            background: #e8f5e9;
+            border-left: 4px solid var(--success);
+        }
+
+        .gps-status.error {
+            background: #ffebee;
+            border-left: 4px solid var(--danger);
+        }
+
+        /* Site Database */
+        .site-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .site-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 4px solid var(--primary);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .site-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .site-item-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .site-item-name {
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .site-item-type {
+            background: var(--primary);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.85em;
+        }
+
+        .site-item-details {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        /* Utility Classes */
         .hidden {
             display: none;
         }
 
-        @media (max-width: 768px) {
-            .main-grid {
-                grid-template-columns: 1fr;
-            }
+        .text-center {
+            text-align: center;
+        }
 
+        .mb-20 {
+            margin-bottom: 20px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
             header h1 {
                 font-size: 2em;
             }
+
+            .tabs {
+                flex-direction: column;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            button {
+                width: 100%;
+            }
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            border: 3px solid var(--border);
+            border-top: 3px solid var(--primary);
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
     </style>
 </head>
 <body>
     <div class="container">
+        <!-- Header -->
         <header>
-            <h1>🦅 EAGLE Field Analysis Tool</h1>
-            <p>Comprehensive field data collection and analysis platform</p>
+            <h1>🦅 EAGLE - Energy Infrastructure Intelligence</h1>
+            <p class="subtitle">Soaring Above the Energy Frontier</p>
+            <p class="company">HH Holdings / Bevans Real Estate | Bosque County, Texas</p>
         </header>
 
-        <div class="main-grid">
-            <!-- Field Information Card -->
-            <div class="card">
-                <h2>Field Information</h2>
-                <div class="form-group">
-                    <label for="fieldName">Field Name</label>
-                    <input type="text" id="fieldName" placeholder="Enter field name">
-                </div>
-                <div class="form-group">
-                    <label for="fieldId">Field ID</label>
-                    <input type="text" id="fieldId" placeholder="Unique identifier">
-                </div>
-                <div class="form-group">
-                    <label for="location">Location</label>
-                    <input type="text" id="location" placeholder="GPS coordinates or address">
-                </div>
-                <div class="form-group">
-                    <label for="fieldSize">Field Size (acres)</label>
-                    <input type="number" id="fieldSize" placeholder="0.00" step="0.01">
-                </div>
-                <div class="form-group">
-                    <label for="cropType">Crop Type</label>
-                    <select id="cropType">
-                        <option value="">Select crop type</option>
-                        <option value="wheat">Wheat</option>
-                        <option value="corn">Corn</option>
-                        <option value="soybeans">Soybeans</option>
-                        <option value="rice">Rice</option>
-                        <option value="other">Other</option>
-                    </select>
-                </div>
-            </div>
+        <!-- Navigation Tabs -->
+        <div class="tabs">
+            <button class="tab-button active" onclick="showTab('gps')">📍 GPS Capture</button>
+            <button class="tab-button" onclick="showTab('solar')">☀️ Solar Farm</button>
+            <button class="tab-button" onclick="showTab('datacenter')">🖥️ Data Center</button>
+            <button class="tab-button" onclick="showTab('database')">💾 Site Database</button>
+        </div>
 
-            <!-- Observation Data Card -->
+        <!-- GPS Capture Tab -->
+        <div id="gps-tab" class="tab-content">
             <div class="card">
-                <h2>Field Observations</h2>
-                <div class="form-group">
-                    <label for="observationDate">Observation Date</label>
-                    <input type="date" id="observationDate">
-                </div>
-                <div class="form-group">
-                    <label for="observationTime">Observation Time</label>
-                    <input type="time" id="observationTime">
-                </div>
-                <div class="form-group">
-                    <label for="weather">Weather Conditions</label>
-                    <select id="weather">
-                        <option value="">Select weather</option>
-                        <option value="sunny">Sunny</option>
-                        <option value="cloudy">Cloudy</option>
-                        <option value="rainy">Rainy</option>
-                        <option value="windy">Windy</option>
-                        <option value="overcast">Overcast</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="soilMoisture">Soil Moisture (%)</label>
-                    <input type="number" id="soilMoisture" placeholder="0-100" min="0" max="100">
-                </div>
-                <div class="form-group">
-                    <label for="temperature">Temperature (°C)</label>
-                    <input type="number" id="temperature" placeholder="-50 to 50" step="0.1">
-                </div>
-            </div>
+                <h2>GPS Location Capture</h2>
 
-            <!-- Analysis Parameters Card -->
-            <div class="card">
-                <h2>Analysis Parameters</h2>
-                <div class="form-group">
-                    <label for="plantHealth">Plant Health Index (0-100)</label>
-                    <input type="number" id="plantHealth" placeholder="0-100" min="0" max="100">
+                <div id="gps-status" class="gps-status hidden">
+                    <span id="gps-icon">📍</span>
+                    <span id="gps-message">Ready to capture GPS</span>
                 </div>
-                <div class="form-group">
-                    <label for="pestPresence">Pest Presence Level</label>
-                    <select id="pestPresence">
-                        <option value="">Select level</option>
-                        <option value="none">None</option>
-                        <option value="low">Low</option>
-                        <option value="moderate">Moderate</option>
-                        <option value="high">High</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="diseaseIndicators">Disease Indicators</label>
-                    <textarea id="diseaseIndicators" placeholder="Describe any visible diseases or abnormalities"></textarea>
-                </div>
-                <div class="form-group">
-                    <label for="ndvi">NDVI Value</label>
-                    <input type="number" id="ndvi" placeholder="-1.0 to 1.0" min="-1" max="1" step="0.01">
-                </div>
-            </div>
 
-            <!-- Notes and Actions Card -->
-            <div class="card">
-                <h2>Additional Notes</h2>
                 <div class="form-group">
-                    <label for="notes">Field Notes</label>
-                    <textarea id="notes" placeholder="Enter any additional observations or notes"></textarea>
+                    <label for="gps-site-name">Site Name</label>
+                    <input type="text" id="gps-site-name" placeholder="Enter site name">
                 </div>
+
                 <div class="button-group">
-                    <button onclick="analyzeField()">Analyze</button>
-                    <button class="button-secondary" onclick="clearForm()">Clear</button>
-                    <button class="button-secondary" onclick="exportData()">Export</button>
+                    <button class="btn-gps" onclick="captureGPS()">📡 Capture GPS Location</button>
+                </div>
+
+                <div id="gps-results" class="results hidden">
+                    <h3>Location Captured</h3>
+                    <div class="results-grid">
+                        <div class="result-item">
+                            <div class="result-label">Latitude</div>
+                            <div class="result-value" id="gps-lat">--</div>
+                        </div>
+                        <div class="result-item">
+                            <div class="result-label">Longitude</div>
+                            <div class="result-value" id="gps-lon">--</div>
+                        </div>
+                        <div class="result-item">
+                            <div class="result-label">Accuracy</div>
+                            <div class="result-value" id="gps-accuracy">--</div>
+                        </div>
+                        <div class="result-item">
+                            <div class="result-label">Territory</div>
+                            <div class="result-value" id="gps-territory">--</div>
+                        </div>
+                    </div>
                 </div>
             </div>
+        </div>
 
-            <!-- Map Container -->
-            <div class="map-container">
-                <h2>Field Map</h2>
-                <div class="map-placeholder">
-                    🗺️ Map Integration Coming Soon - GPS coordinates will be visualized here
+        <!-- Solar Farm Tab -->
+        <div id="solar-tab" class="tab-content hidden">
+            <div class="card">
+                <h2>Solar Farm Analysis</h2>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="solar-name">Site Name</label>
+                        <input type="text" id="solar-name" placeholder="e.g., Meridian Ranch Solar">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="solar-acres">Land Area (acres)</label>
+                        <input type="number" id="solar-acres" placeholder="150" step="0.1" min="0">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="solar-notes">Notes</label>
+                    <textarea id="solar-notes" placeholder="Site observations, access notes, transmission proximity..."></textarea>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn-primary" onclick="analyzeSolar()">⚡ Calculate Solar Potential</button>
+                    <button class="btn-gps" onclick="captureGPSForAnalysis('solar')">📍 Add GPS</button>
+                    <button class="btn-secondary" onclick="clearSolarForm()">Clear</button>
+                </div>
+
+                <div id="solar-results" class="results hidden">
+                    <h3>☀️ Solar Farm Analysis Results</h3>
+                    <div class="results-grid">
+                        <div class="result-item">
+                            <div class="result-label">Installed Capacity</div>
+                            <div class="result-value" id="solar-capacity">-- MW</div>
+                        </div>
+                        <div class="result-item">
+                            <div class="result-label">Annual Generation</div>
+                            <div class="result-value" id="solar-generation">-- MWh</div>
+                        </div>
+                        <div class="result-item">
+                            <div class="result-label">Homes Powered</div>
+                            <div class="result-value" id="solar-homes">--</div>
+                        </div>
+                        <div class="result-item">
+                            <div class="result-label">Est. CAPEX</div>
+                            <div class="result-value" id="solar-capex">$--</div>
+                        </div>
+                        <div class="result-item">
+                            <div class="result-label">Annual Revenue</div>
+                            <div class="result-value" id="solar-revenue">$--</div>
+                        </div>
+                        <div class="result-item">
+                            <div class="result-label">Revenue/Acre</div>
+                            <div class="result-value" id="solar-revenue-acre">$--</div>
+                        </div>
+                    </div>
+                    <div class="button-group">
+                        <button class="btn-success" onclick="saveSite('solar')">💾 Save to Database</button>
+                        <button class="btn-secondary" onclick="exportSiteJSON('solar')">📤 Export JSON</button>
+                    </div>
                 </div>
             </div>
+        </div>
 
-            <!-- Results Container -->
-            <div class="results-container hidden" id="resultsContainer">
-                <h2>Analysis Results</h2>
-                <div class="results-grid" id="resultsGrid">
-                    <!-- Results will be populated here -->
+        <!-- Data Center Tab -->
+        <div id="datacenter-tab" class="tab-content hidden">
+            <div class="card">
+                <h2>Data Center Power Analysis</h2>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="dc-name">Site Name</label>
+                        <input type="text" id="dc-name" placeholder="e.g., Bosque Edge Data Center">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="dc-servers">Number of Servers</label>
+                        <input type="number" id="dc-servers" placeholder="1000" min="1">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="dc-watts">Server Power (Watts)</label>
+                        <input type="number" id="dc-watts" value="500" min="100" max="2000">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="dc-pue">PUE (Power Usage Effectiveness)</label>
+                        <select id="dc-pue">
+                            <option value="1.2">1.2 - Excellent (Hyperscale)</option>
+                            <option value="1.5" selected>1.5 - Good (Modern)</option>
+                            <option value="1.8">1.8 - Average (Typical)</option>
+                            <option value="2.0">2.0 - Poor (Legacy)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="dc-notes">Notes</label>
+                    <textarea id="dc-notes" placeholder="Fiber availability, power proximity, water access notes..."></textarea>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn-primary" onclick="analyzeDataCenter()">⚡ Calculate Power Requirements</button>
+                    <button class="btn-gps" onclick="captureGPSForAnalysis('datacenter')">📍 Add GPS</button>
+                    <button class="btn-secondary" onclick="clearDataCenterForm()">Clear</button>
+                </div>
+
+                <div id="dc-results" class="results hidden">
+                    <h3>🖥️ Data Center Analysis Results</h3>
+                    <div class="results-grid">
+                        <div class="result-item">
+                            <div class="result-label">IT Load</div>
+                            <div class="result-value" id="dc-it-load">-- kW</div>
+                        </div>
+                        <div class="result-item">
+                            <div class="result-label">Total Facility</div>
+                            <div class="result-value" id="dc-total">-- MW</div>
+                        </div>
+                        <div class="result-item">
+                            <div class="result-label">Annual Consumption</div>
+                            <div class="result-value" id="dc-annual">-- MWh</div>
+                        </div>
+                        <div class="result-item">
+                            <div class="result-label">Electricity Cost/Year</div>
+                            <div class="result-value" id="dc-cost">$--</div>
+                        </div>
+                        <div class="result-item">
+                            <div class="result-label">Building Size</div>
+                            <div class="result-value" id="dc-building">-- sq ft</div>
+                        </div>
+                        <div class="result-item">
+                            <div class="result-label">Land Required</div>
+                            <div class="result-value" id="dc-land">-- acres</div>
+                        </div>
+                    </div>
+                    <div class="button-group">
+                        <button class="btn-success" onclick="saveSite('datacenter')">💾 Save to Database</button>
+                        <button class="btn-secondary" onclick="exportSiteJSON('datacenter')">📤 Export JSON</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Database Tab -->
+        <div id="database-tab" class="tab-content hidden">
+            <div class="card">
+                <h2>Site Database</h2>
+
+                <div class="button-group mb-20">
+                    <button class="btn-secondary" onclick="loadSites()">🔄 Refresh</button>
+                    <button class="btn-success" onclick="exportAllSitesCSV()">📤 Export All (CSV)</button>
+                    <button class="btn-secondary" onclick="clearDatabase()">🗑️ Clear All</button>
+                </div>
+
+                <div id="site-stats" class="results mb-20">
+                    <div class="results-grid">
+                        <div class="result-item">
+                            <div class="result-label">Total Sites</div>
+                            <div class="result-value" id="stats-total">0</div>
+                        </div>
+                        <div class="result-item">
+                            <div class="result-label">Solar Sites</div>
+                            <div class="result-value" id="stats-solar">0</div>
+                        </div>
+                        <div class="result-item">
+                            <div class="result-label">Data Center Sites</div>
+                            <div class="result-value" id="stats-dc">0</div>
+                        </div>
+                        <div class="result-item">
+                            <div class="result-label">Total MW Capacity</div>
+                            <div class="result-value" id="stats-mw">0</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="site-list" id="site-list">
+                    <p class="text-center" style="color: #666;">No sites saved yet. Analyze and save sites to see them here.</p>
                 </div>
             </div>
         </div>
     </div>
 
-    <script>
-        // Set today's date as default
-        document.getElementById('observationDate').valueAsDate = new Date();
-        document.getElementById('observationTime').value = new Date().toTimeString().slice(0, 5);
-
-        function analyzeField() {
-            const data = {
-                fieldName: document.getElementById('fieldName').value,
-                fieldId: document.getElementById('fieldId').value,
-                location: document.getElementById('location').value,
-                fieldSize: parseFloat(document.getElementById('fieldSize').value) || 0,
-                cropType: document.getElementById('cropType').value,
-                plantHealth: parseFloat(document.getElementById('plantHealth').value) || 0,
-                soilMoisture: parseFloat(document.getElementById('soilMoisture').value) || 0,
-                temperature: parseFloat(document.getElementById('temperature').value) || 0,
-                ndvi: parseFloat(document.getElementById('ndvi').value) || 0,
-                pestPresence: document.getElementById('pestPresence').value,
-                weather: document.getElementById('weather').value
-            };
-
-            // Validation
-            if (!data.fieldName || !data.fieldId) {
-                alert('Please fill in Field Name and Field ID');
-                return;
-            }
-
-            // Calculate health score
-            const healthScore = Math.round(data.plantHealth);
-            
-            // Generate results
-            const resultsContainer = document.getElementById('resultsContainer');
-            const resultsGrid = document.getElementById('resultsGrid');
-            
-            resultsGrid.innerHTML = `
-                <div class="result-item">
-                    <div class="result-label">Overall Health Score</div>
-                    <div class="result-value">${healthScore}%</div>
-                </div>
-                <div class="result-item">
-                    <div class="result-label">Field Size</div>
-                    <div class="result-value">${data.fieldSize} acres</div>
-                </div>
-                <div class="result-item">
-                    <div class="result-label">Crop Type</div>
-                    <div class="result-value">${data.cropType || 'N/A'}</div>
-                </div>
-                <div class="result-item">
-                    <div class="result-label">NDVI Reading</div>
-                    <div class="result-value">${data.ndvi.toFixed(2)}</div>
-                </div>
-                <div class="result-item">
-                    <div class="result-label">Soil Moisture</div>
-                    <div class="result-value">${data.soilMoisture}%</div>
-                </div>
-                <div class="result-item">
-                    <div class="result-label">Temperature</div>
-                    <div class="result-value">${data.temperature}°C</div>
-                </div>
-                <div class="result-item">
-                    <div class="result-label">Pest Level</div>
-                    <div class="result-value">${data.pestPresence || 'N/A'}</div>
-                </div>
-                <div class="result-item">
-                    <div class="result-label">Weather</div>
-                    <div class="result-value">${data.weather || 'N/A'}</div>
-                </div>
-            `;
-            
-            resultsContainer.classList.remove('hidden');
-            resultsContainer.scrollIntoView({ behavior: 'smooth' });
-        }
-
-        function clearForm() {
-            document.querySelectorAll('input, select, textarea').forEach(el => {
-                if (el.type === 'date') {
-                    el.valueAsDate = new Date();
-                } else if (el.type === 'time') {
-                    el.value = new Date().toTimeString().slice(0, 5);
-                } else {
-                    el.value = '';
-                }
-            });
-            document.getElementById('resultsContainer').classList.add('hidden');
-        }
-
-        function exportData() {
-            const data = {
-                fieldName: document.getElementById('fieldName').value,
-                fieldId: document.getElementById('fieldId').value,
-                location: document.getElementById('location').value,
-                fieldSize: document.getElementById('fieldSize').value,
-                cropType: document.getElementById('cropType').value,
-                observationDate: document.getElementById('observationDate').value,
-                observationTime: document.getElementById('observationTime').value,
-                weather: document.getElementById('weather').value,
-                soilMoisture: document.getElementById('soilMoisture').value,
-                temperature: document.getElementById('temperature').value,
-                plantHealth: document.getElementById('plantHealth').value,
-                pestPresence: document.getElementById('pestPresence').value,
-                diseaseIndicators: document.getElementById('diseaseIndicators').value,
-                ndvi: document.getElementById('ndvi').value,
-                notes: document.getElementById('notes').value
-            };
-
-            const jsonString = JSON.stringify(data, null, 2);
-            const blob = new Blob([jsonString], { type: 'application/json' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `field-analysis-${data.fieldId}-${new Date().toISOString().split('T')[0]}.json`;
-            document.body.appendChild(a);
-            a.click();
-            window.URL.revokeObjectURL(url);
-            document.body.removeChild(a);
-        }
-    </script>
+    <script src="app.js"></script>
 </body>
 </html>
