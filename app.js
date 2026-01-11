@@ -47,6 +47,23 @@ const BOSQUE_COUNTY = {
     brazosRiver: { lat: 31.8500, lon: -97.6000 }
 };
 
+// Clerk Records Scraping Configuration (Client-Side)
+const CLERK_CONFIG = {
+    corsProxies: [
+        'https://api.allorigins.win/raw?url=',  // AllOrigins - reliable
+        'https://corsproxy.io/?',               // CORSProxy.io
+        'https://api.codetabs.com/v1/proxy?quest='  // CodeTabs
+    ],
+    sources: {
+        texasfile: 'https://www.texasfile.com/search',
+        bosquecad: 'https://esearch.bosquecad.com/',
+        kofile: 'https://kofilequicklinks.com/Bosque/'
+    },
+    enabled: true,  // Client-side scraping enabled by default
+    timeout: 15000,
+    currentProxyIndex: 0
+};
+
 // ============================================================================
 // TAB NAVIGATION
 // ============================================================================
@@ -900,7 +917,7 @@ function updateSearchPlaceholder() {
     searchInput.placeholder = placeholders[searchType] || 'Enter search value';
 }
 
-function searchProperty() {
+async function searchProperty() {
     const searchType = document.getElementById('search-type').value;
     const searchValue = document.getElementById('search-input').value.trim();
 
@@ -909,7 +926,31 @@ function searchProperty() {
         return;
     }
 
-    // Since we can't directly access CAD database, show instructions
+    // Try clerk records API first
+    if (CLERK_API.enabled) {
+        let apiSearchType = 'name';
+        let additionalParams = {};
+
+        if (searchType === 'owner') {
+            apiSearchType = 'name';
+        } else if (searchType === 'address' || searchType === 'parcel') {
+            apiSearchType = 'property';
+            if (searchType === 'parcel') {
+                additionalParams.property_id = searchValue;
+            } else {
+                additionalParams.address = searchValue;
+            }
+        }
+
+        const results = await searchClerkRecords(apiSearchType, searchValue, additionalParams);
+
+        if (results && results.success) {
+            displayClerkRecords(results.results, searchValue);
+            return;
+        }
+    }
+
+    // Fallback to manual search instructions
     const propertyInfo = document.getElementById('property-info');
     const propertyDetails = document.getElementById('property-details');
 
@@ -1336,6 +1377,477 @@ function saveManualPropertyData() {
 function getProperties() {
     const propsJSON = localStorage.getItem('eagle-properties');
     return propsJSON ? JSON.parse(propsJSON) : [];
+}
+
+// ============================================================================
+// CLERK RECORDS CLIENT-SIDE SCRAPING
+// ============================================================================
+
+async function searchClerkRecords(searchType, searchValue, additionalParams = {}) {
+    /**
+     * Search Bosque County clerk records via client-side scraping
+     *
+     * @param searchType - 'name', 'property', or 'date'
+     * @param searchValue - Search value (name, property_id, or date range)
+     * @param additionalParams - Additional parameters (type, address, etc.)
+     */
+
+    if (!CLERK_CONFIG.enabled) {
+        console.log('Clerk scraping is disabled');
+        showClerkFallbackMessage();
+        return null;
+    }
+
+    // Show loading indicator
+    showSearchingMessage(searchValue);
+
+    try {
+        // Try direct scraping first (will likely fail due to CORS)
+        let results = await scrapeDirectly(searchType, searchValue, additionalParams);
+
+        if (!results || results.length === 0) {
+            // Try with CORS proxy
+            results = await scrapeWithProxy(searchType, searchValue, additionalParams);
+        }
+
+        return {
+            success: true,
+            count: results ? results.length : 0,
+            results: results || [],
+            query: { searchType, searchValue, ...additionalParams }
+        };
+
+    } catch (error) {
+        console.error('Clerk records search error:', error);
+
+        // Fall back to manual instructions
+        return {
+            success: false,
+            error: error.message,
+            results: []
+        };
+    }
+}
+
+async function scrapeDirectly(searchType, searchValue, additionalParams) {
+    /**
+     * Attempt direct scraping without proxy (will likely fail due to CORS)
+     */
+    try {
+        const url = buildSearchURL(searchType, searchValue, additionalParams);
+
+        const response = await fetch(url, {
+            method: 'GET',
+            mode: 'cors',
+            signal: AbortSignal.timeout(CLERK_CONFIG.timeout)
+        });
+
+        if (response.ok) {
+            const html = await response.text();
+            return parseClerkHTML(html, searchType);
+        }
+    } catch (error) {
+        console.log('Direct scraping failed (expected):', error.message);
+    }
+
+    return null;
+}
+
+async function scrapeWithProxy(searchType, searchValue, additionalParams) {
+    /**
+     * Scrape using CORS proxy services
+     */
+    const url = buildSearchURL(searchType, searchValue, additionalParams);
+
+    // Try each proxy in sequence
+    for (let i = 0; i < CLERK_CONFIG.corsProxies.length; i++) {
+        const proxyIndex = (CLERK_CONFIG.currentProxyIndex + i) % CLERK_CONFIG.corsProxies.length;
+        const proxy = CLERK_CONFIG.corsProxies[proxyIndex];
+
+        try {
+            console.log(`Trying proxy ${proxyIndex + 1}:`, proxy);
+
+            const proxyUrl = proxy + encodeURIComponent(url);
+
+            const response = await fetch(proxyUrl, {
+                method: 'GET',
+                signal: AbortSignal.timeout(CLERK_CONFIG.timeout)
+            });
+
+            if (response.ok) {
+                const html = await response.text();
+                const results = parseClerkHTML(html, searchType);
+
+                if (results && results.length > 0) {
+                    // Update current proxy index for next search
+                    CLERK_CONFIG.currentProxyIndex = proxyIndex;
+                    console.log(`✅ Successfully scraped via proxy ${proxyIndex + 1}`);
+                    return results;
+                }
+            }
+        } catch (error) {
+            console.log(`Proxy ${proxyIndex + 1} failed:`, error.message);
+            continue;
+        }
+    }
+
+    console.log('All proxies failed, returning empty results');
+    return [];
+}
+
+function buildSearchURL(searchType, searchValue, additionalParams) {
+    /**
+     * Build search URL for clerk records site
+     */
+
+    // For now, using Bosque CAD as primary source
+    const baseUrl = CLERK_CONFIG.sources.bosquecad;
+
+    // Build query parameters
+    const params = new URLSearchParams();
+
+    if (searchType === 'name') {
+        params.append('search', searchValue);
+        params.append('searchType', 'owner');
+    } else if (searchType === 'property') {
+        if (additionalParams.property_id) {
+            params.append('search', additionalParams.property_id);
+            params.append('searchType', 'parcel');
+        } else if (additionalParams.address) {
+            params.append('search', additionalParams.address);
+            params.append('searchType', 'address');
+        }
+    }
+
+    return baseUrl + (params.toString() ? '?' + params.toString() : '');
+}
+
+function parseClerkHTML(html, searchType) {
+    /**
+     * Parse HTML from clerk records site
+     */
+    try {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+
+        const results = [];
+
+        // Try multiple selectors for different site structures
+        const recordSelectors = [
+            '.property-record',
+            '.search-result',
+            'tr.data-row',
+            '.record-item',
+            'table tbody tr'
+        ];
+
+        for (const selector of recordSelectors) {
+            const records = doc.querySelectorAll(selector);
+
+            if (records.length > 0) {
+                records.forEach((record, index) => {
+                    if (index >= 50) return; // Limit to 50 results
+
+                    const parsed = parseRecordElement(record);
+                    if (parsed && parsed.id) {
+                        results.push(parsed);
+                    }
+                });
+
+                if (results.length > 0) {
+                    break;
+                }
+            }
+        }
+
+        // If no structured results, try to extract any property/parcel info
+        if (results.length === 0) {
+            const textResults = extractFromText(doc);
+            results.push(...textResults);
+        }
+
+        return results;
+    } catch (error) {
+        console.error('HTML parsing error:', error);
+        return [];
+    }
+}
+
+function parseRecordElement(element) {
+    /**
+     * Parse a single record element
+     */
+    try {
+        // Try to extract common fields
+        const record = {
+            id: extractText(element, ['data-id', 'id']) || 'REC-' + Date.now(),
+            source: 'Bosque County',
+            document_type: extractText(element, ['.doc-type', '.type', 'td:nth-child(1)']),
+            instrument_number: extractText(element, ['.instrument', '.doc-number', 'td:nth-child(2)']),
+            filed_date: extractText(element, ['.filed-date', '.date', 'td:nth-child(3)']),
+            grantor: extractText(element, ['.grantor', '.from', 'td:nth-child(4)']),
+            grantee: extractText(element, ['.grantee', '.to', 'td:nth-child(5)']),
+            legal_description: extractText(element, ['.legal-desc', '.description', 'td:nth-child(6)']),
+            volume: extractText(element, ['.volume', 'td:nth-child(7)']),
+            page: extractText(element, ['.page', 'td:nth-child(8)'])
+        };
+
+        // Only return if we have at least some data
+        if (record.document_type || record.grantor || record.grantee) {
+            return record;
+        }
+    } catch (error) {
+        console.error('Record parsing error:', error);
+    }
+
+    return null;
+}
+
+function extractText(element, selectors) {
+    /**
+     * Extract text from element using multiple selector attempts
+     */
+    if (!element) return '';
+
+    // If selectors is an attribute name
+    if (typeof selectors === 'string' && selectors.startsWith('data-')) {
+        return element.getAttribute(selectors) || '';
+    }
+
+    // Try each selector
+    for (const selector of selectors) {
+        try {
+            if (selector.startsWith('.') || selector.startsWith('[') || selector.includes(':')) {
+                const found = element.querySelector(selector);
+                if (found && found.textContent) {
+                    return found.textContent.trim();
+                }
+            } else if (selector === 'id') {
+                return element.id || '';
+            }
+        } catch (e) {
+            continue;
+        }
+    }
+
+    return '';
+}
+
+function extractFromText(doc) {
+    /**
+     * Extract property information from page text when no structured data
+     */
+    const results = [];
+    const bodyText = doc.body ? doc.body.textContent : '';
+
+    // Look for patterns in text
+    const parcelPattern = /Parcel[:\s]+([A-Z0-9-]+)/gi;
+    const ownerPattern = /Owner[:\s]+([A-Za-z\s,]+)/gi;
+    const acreagePattern = /(\d+\.?\d*)\s*acres?/gi;
+
+    let match;
+    const foundParcels = new Set();
+
+    while ((match = parcelPattern.exec(bodyText)) !== null) {
+        const parcelId = match[1].trim();
+        if (!foundParcels.has(parcelId)) {
+            foundParcels.add(parcelId);
+
+            results.push({
+                id: 'PARCEL-' + parcelId,
+                source: 'Bosque County CAD',
+                document_type: 'Property Record',
+                instrument_number: parcelId,
+                filed_date: '',
+                grantor: '',
+                grantee: '',
+                legal_description: `Parcel ID: ${parcelId}`,
+                volume: '',
+                page: ''
+            });
+        }
+    }
+
+    return results;
+}
+
+function showSearchingMessage(searchValue) {
+    /**
+     * Show loading message while searching
+     */
+    const propertyInfo = document.getElementById('property-info');
+    const propertyDetails = document.getElementById('property-details');
+
+    if (propertyDetails) {
+        propertyDetails.innerHTML = `
+            <div style="padding: 30px; background: #f7fafc; border-radius: 8px; text-align: center;">
+                <div style="font-size: 48px; margin-bottom: 15px;">🔍</div>
+                <h4 style="color: var(--primary); margin-bottom: 10px;">Searching Clerk Records...</h4>
+                <p style="color: #666;">Searching for: <strong>${searchValue}</strong></p>
+                <p style="color: #999; font-size: 14px; margin-top: 10px;">
+                    Using CORS proxies to access Bosque County records
+                </p>
+            </div>
+        `;
+        propertyInfo.classList.remove('hidden');
+        propertyInfo.scrollIntoView({ behavior: 'smooth' });
+    }
+}
+
+function showClerkFallbackMessage() {
+    /**
+     * Show message when scraping is disabled
+     */
+    const message = `
+        <div style="padding: 20px; background: #e6f2ff; border-radius: 8px; border-left: 4px solid var(--primary);">
+            <h4 style="color: var(--primary); margin-bottom: 10px;">📋 Clerk Records Search</h4>
+            <p style="color: #666; margin-bottom: 15px;">
+                Client-side scraping is currently disabled. Visit the official sites below to search manually:
+            </p>
+            <ul style="margin-left: 20px; color: #666; line-height: 1.8;">
+                <li><a href="https://esearch.bosquecad.com/" target="_blank" style="color: var(--primary); font-weight: 600;">Bosque County CAD</a> - Property search</li>
+                <li><a href="https://www.texasfile.com/" target="_blank" style="color: var(--primary); font-weight: 600;">TexasFile</a> - Official deed records</li>
+                <li><a href="https://kofilequicklinks.com/Bosque/" target="_blank" style="color: var(--primary); font-weight: 600;">KoFile</a> - Historical records</li>
+            </ul>
+        </div>
+    `;
+
+    const propertyInfo = document.getElementById('property-info');
+    const propertyDetails = document.getElementById('property-details');
+
+    if (propertyDetails) {
+        propertyDetails.innerHTML = message;
+        propertyInfo.classList.remove('hidden');
+    }
+}
+
+async function getClerkDocument(documentId, source) {
+    /**
+     * View document on official site (opens in new tab)
+     */
+    let url = '';
+
+    if (source === 'TexasFile' || source === 'texasfile') {
+        url = `https://www.texasfile.com/document/${documentId}`;
+    } else if (source === 'KoFile' || source === 'kofile') {
+        url = `https://kofilequicklinks.com/Bosque/document/${documentId}`;
+    } else {
+        url = `https://esearch.bosquecad.com/property/${documentId}`;
+    }
+
+    window.open(url, '_blank');
+    return { viewed: true, url };
+}
+
+function displayClerkRecords(results, searchQuery) {
+    /**
+     * Display clerk records search results on the page
+     */
+
+    const propertyInfo = document.getElementById('property-info');
+    const propertyDetails = document.getElementById('property-details');
+
+    if (!results || results.length === 0) {
+        propertyDetails.innerHTML = `
+            <div style="padding: 20px; background: #f7fafc; border-radius: 8px;">
+                <h4 style="color: var(--primary); margin-bottom: 15px;">📋 No Records Found</h4>
+                <p style="color: #666;">
+                    No clerk records were found for: <strong>${searchQuery}</strong>
+                </p>
+                <p style="color: #666; margin-top: 10px;">
+                    Try searching with different terms or visit the
+                    <a href="https://www.texasfile.com/" target="_blank" style="color: var(--primary); font-weight: 600;">
+                        official clerk records portal
+                    </a>.
+                </p>
+            </div>
+        `;
+        propertyInfo.classList.remove('hidden');
+        return;
+    }
+
+    let html = `
+        <div style="padding: 20px; background: #f7fafc; border-radius: 8px;">
+            <h4 style="color: var(--primary); margin-bottom: 15px;">
+                📋 Clerk Records Found: ${results.length} ${results.length === 1 ? 'Record' : 'Records'}
+            </h4>
+            <p style="color: #666; margin-bottom: 20px;">
+                Search: <strong>${searchQuery}</strong>
+            </p>
+    `;
+
+    results.forEach((record, index) => {
+        html += `
+            <div style="background: white; padding: 15px; border-radius: 6px; margin-bottom: 15px; border-left: 4px solid var(--primary);">
+                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">
+                    <strong style="color: var(--primary); font-size: 16px;">
+                        ${record.document_type || 'Document'} #${record.instrument_number || record.id}
+                    </strong>
+                    <span style="background: #e6f2ff; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600;">
+                        ${record.source || 'Bosque County'}
+                    </span>
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-bottom: 10px;">
+                    ${record.filed_date ? `
+                    <div>
+                        <div style="font-size: 12px; color: #666; font-weight: 600;">Filed Date</div>
+                        <div style="color: #2d3748;">${record.filed_date}</div>
+                    </div>` : ''}
+
+                    ${record.grantor ? `
+                    <div>
+                        <div style="font-size: 12px; color: #666; font-weight: 600;">Grantor</div>
+                        <div style="color: #2d3748;">${record.grantor}</div>
+                    </div>` : ''}
+
+                    ${record.grantee ? `
+                    <div>
+                        <div style="font-size: 12px; color: #666; font-weight: 600;">Grantee</div>
+                        <div style="color: #2d3748;">${record.grantee}</div>
+                    </div>` : ''}
+
+                    ${record.volume && record.page ? `
+                    <div>
+                        <div style="font-size: 12px; color: #666; font-weight: 600;">Volume/Page</div>
+                        <div style="color: #2d3748;">Vol ${record.volume}, Pg ${record.page}</div>
+                    </div>` : ''}
+                </div>
+
+                ${record.legal_description ? `
+                <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #e2e8f0;">
+                    <div style="font-size: 12px; color: #666; font-weight: 600; margin-bottom: 5px;">Legal Description</div>
+                    <div style="color: #2d3748; font-size: 14px;">${record.legal_description}</div>
+                </div>` : ''}
+
+                <button onclick="viewClerkDocument('${record.id || record.instrument_number}', '${record.source || 'texasfile'}')"
+                        style="margin-top: 10px; padding: 8px 16px; background: var(--primary); color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 600;">
+                    📄 View Full Document
+                </button>
+            </div>
+        `;
+    });
+
+    html += '</div>';
+
+    propertyDetails.innerHTML = html;
+    propertyInfo.classList.remove('hidden');
+    propertyInfo.scrollIntoView({ behavior: 'smooth' });
+}
+
+async function viewClerkDocument(documentId, source) {
+    /**
+     * View full clerk document details
+     */
+
+    const document = await getClerkDocument(documentId, source);
+
+    if (!document) {
+        return;
+    }
+
+    // Display document details in a modal or expanded view
+    alert(`Document ${documentId} retrieved. Full document viewer would display here.`);
 }
 
 // ============================================================================
