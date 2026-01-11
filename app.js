@@ -47,12 +47,21 @@ const BOSQUE_COUNTY = {
     brazosRiver: { lat: 31.8500, lon: -97.6000 }
 };
 
-// Clerk Records API Configuration
-const CLERK_API = {
-    // Update this URL when you deploy the backend
-    baseUrl: 'http://localhost:5000/api',  // Change to your deployed API URL
-    enabled: false,  // Set to true when API is deployed
-    timeout: 10000
+// Clerk Records Scraping Configuration (Client-Side)
+const CLERK_CONFIG = {
+    corsProxies: [
+        'https://api.allorigins.win/raw?url=',  // AllOrigins - reliable
+        'https://corsproxy.io/?',               // CORSProxy.io
+        'https://api.codetabs.com/v1/proxy?quest='  // CodeTabs
+    ],
+    sources: {
+        texasfile: 'https://www.texasfile.com/search',
+        bosquecad: 'https://esearch.bosquecad.com/',
+        kofile: 'https://kofilequicklinks.com/Bosque/'
+    },
+    enabled: true,  // Client-side scraping enabled by default
+    timeout: 15000,
+    currentProxyIndex: 0
 };
 
 // ============================================================================
@@ -1371,156 +1380,335 @@ function getProperties() {
 }
 
 // ============================================================================
-// CLERK RECORDS API INTEGRATION
+// CLERK RECORDS CLIENT-SIDE SCRAPING
 // ============================================================================
 
 async function searchClerkRecords(searchType, searchValue, additionalParams = {}) {
     /**
-     * Search Bosque County clerk records via backend API
+     * Search Bosque County clerk records via client-side scraping
      *
      * @param searchType - 'name', 'property', or 'date'
      * @param searchValue - Search value (name, property_id, or date range)
      * @param additionalParams - Additional parameters (type, address, etc.)
      */
 
-    if (!CLERK_API.enabled) {
-        console.log('Clerk API is disabled. Enable by setting CLERK_API.enabled = true');
-        showClerkAPIDisabledMessage();
+    if (!CLERK_CONFIG.enabled) {
+        console.log('Clerk scraping is disabled');
+        showClerkFallbackMessage();
         return null;
     }
 
+    // Show loading indicator
+    showSearchingMessage(searchValue);
+
     try {
-        let url = `${CLERK_API.baseUrl}/clerk/search/${searchType}`;
-        const params = new URLSearchParams();
+        // Try direct scraping first (will likely fail due to CORS)
+        let results = await scrapeDirectly(searchType, searchValue, additionalParams);
 
-        // Build query parameters based on search type
-        if (searchType === 'name') {
-            params.append('name', searchValue);
-            if (additionalParams.type) {
-                params.append('type', additionalParams.type);
-            }
-        } else if (searchType === 'property') {
-            if (additionalParams.property_id) {
-                params.append('property_id', additionalParams.property_id);
-            }
-            if (additionalParams.address) {
-                params.append('address', additionalParams.address);
-            }
-        } else if (searchType === 'date') {
-            params.append('start_date', additionalParams.start_date);
-            params.append('end_date', additionalParams.end_date);
-            if (additionalParams.type) {
-                params.append('type', additionalParams.type);
-            }
+        if (!results || results.length === 0) {
+            // Try with CORS proxy
+            results = await scrapeWithProxy(searchType, searchValue, additionalParams);
         }
 
-        url += '?' + params.toString();
-
-        const response = await fetch(url, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            signal: AbortSignal.timeout(CLERK_API.timeout)
-        });
-
-        if (!response.ok) {
-            throw new Error(`API returned ${response.status}: ${response.statusText}`);
-        }
-
-        const data = await response.json();
-        return data;
+        return {
+            success: true,
+            count: results ? results.length : 0,
+            results: results || [],
+            query: { searchType, searchValue, ...additionalParams }
+        };
 
     } catch (error) {
         console.error('Clerk records search error:', error);
 
-        if (error.name === 'AbortError') {
-            alert('Search timeout. The clerk records service may be unavailable.');
-        } else {
-            alert(`Error searching clerk records: ${error.message}`);
-        }
-
-        return null;
+        // Fall back to manual instructions
+        return {
+            success: false,
+            error: error.message,
+            results: []
+        };
     }
 }
 
-async function getClerkDocument(documentId, source = 'texasfile') {
+async function scrapeDirectly(searchType, searchValue, additionalParams) {
     /**
-     * Retrieve full document details from clerk records
+     * Attempt direct scraping without proxy (will likely fail due to CORS)
      */
-
-    if (!CLERK_API.enabled) {
-        showClerkAPIDisabledMessage();
-        return null;
-    }
-
     try {
-        const url = `${CLERK_API.baseUrl}/clerk/document/${documentId}?source=${source}`;
+        const url = buildSearchURL(searchType, searchValue, additionalParams);
 
         const response = await fetch(url, {
             method: 'GET',
-            signal: AbortSignal.timeout(CLERK_API.timeout)
+            mode: 'cors',
+            signal: AbortSignal.timeout(CLERK_CONFIG.timeout)
         });
 
-        if (!response.ok) {
-            throw new Error(`Document not found: ${response.status}`);
+        if (response.ok) {
+            const html = await response.text();
+            return parseClerkHTML(html, searchType);
         }
-
-        const data = await response.json();
-        return data.document;
-
     } catch (error) {
-        console.error('Document retrieval error:', error);
-        alert(`Error retrieving document: ${error.message}`);
-        return null;
+        console.log('Direct scraping failed (expected):', error.message);
     }
+
+    return null;
 }
 
-async function getClerkRecordTypes() {
+async function scrapeWithProxy(searchType, searchValue, additionalParams) {
     /**
-     * Get list of available record types
+     * Scrape using CORS proxy services
      */
+    const url = buildSearchURL(searchType, searchValue, additionalParams);
 
-    if (!CLERK_API.enabled) {
-        return [];
-    }
+    // Try each proxy in sequence
+    for (let i = 0; i < CLERK_CONFIG.corsProxies.length; i++) {
+        const proxyIndex = (CLERK_CONFIG.currentProxyIndex + i) % CLERK_CONFIG.corsProxies.length;
+        const proxy = CLERK_CONFIG.corsProxies[proxyIndex];
 
-    try {
-        const url = `${CLERK_API.baseUrl}/clerk/types`;
-        const response = await fetch(url);
+        try {
+            console.log(`Trying proxy ${proxyIndex + 1}:`, proxy);
 
-        if (response.ok) {
-            const data = await response.json();
-            return data.record_types;
+            const proxyUrl = proxy + encodeURIComponent(url);
+
+            const response = await fetch(proxyUrl, {
+                method: 'GET',
+                signal: AbortSignal.timeout(CLERK_CONFIG.timeout)
+            });
+
+            if (response.ok) {
+                const html = await response.text();
+                const results = parseClerkHTML(html, searchType);
+
+                if (results && results.length > 0) {
+                    // Update current proxy index for next search
+                    CLERK_CONFIG.currentProxyIndex = proxyIndex;
+                    console.log(`✅ Successfully scraped via proxy ${proxyIndex + 1}`);
+                    return results;
+                }
+            }
+        } catch (error) {
+            console.log(`Proxy ${proxyIndex + 1} failed:`, error.message);
+            continue;
         }
-    } catch (error) {
-        console.error('Error fetching record types:', error);
     }
 
+    console.log('All proxies failed, returning empty results');
     return [];
 }
 
-function showClerkAPIDisabledMessage() {
+function buildSearchURL(searchType, searchValue, additionalParams) {
+    /**
+     * Build search URL for clerk records site
+     */
+
+    // For now, using Bosque CAD as primary source
+    const baseUrl = CLERK_CONFIG.sources.bosquecad;
+
+    // Build query parameters
+    const params = new URLSearchParams();
+
+    if (searchType === 'name') {
+        params.append('search', searchValue);
+        params.append('searchType', 'owner');
+    } else if (searchType === 'property') {
+        if (additionalParams.property_id) {
+            params.append('search', additionalParams.property_id);
+            params.append('searchType', 'parcel');
+        } else if (additionalParams.address) {
+            params.append('search', additionalParams.address);
+            params.append('searchType', 'address');
+        }
+    }
+
+    return baseUrl + (params.toString() ? '?' + params.toString() : '');
+}
+
+function parseClerkHTML(html, searchType) {
+    /**
+     * Parse HTML from clerk records site
+     */
+    try {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+
+        const results = [];
+
+        // Try multiple selectors for different site structures
+        const recordSelectors = [
+            '.property-record',
+            '.search-result',
+            'tr.data-row',
+            '.record-item',
+            'table tbody tr'
+        ];
+
+        for (const selector of recordSelectors) {
+            const records = doc.querySelectorAll(selector);
+
+            if (records.length > 0) {
+                records.forEach((record, index) => {
+                    if (index >= 50) return; // Limit to 50 results
+
+                    const parsed = parseRecordElement(record);
+                    if (parsed && parsed.id) {
+                        results.push(parsed);
+                    }
+                });
+
+                if (results.length > 0) {
+                    break;
+                }
+            }
+        }
+
+        // If no structured results, try to extract any property/parcel info
+        if (results.length === 0) {
+            const textResults = extractFromText(doc);
+            results.push(...textResults);
+        }
+
+        return results;
+    } catch (error) {
+        console.error('HTML parsing error:', error);
+        return [];
+    }
+}
+
+function parseRecordElement(element) {
+    /**
+     * Parse a single record element
+     */
+    try {
+        // Try to extract common fields
+        const record = {
+            id: extractText(element, ['data-id', 'id']) || 'REC-' + Date.now(),
+            source: 'Bosque County',
+            document_type: extractText(element, ['.doc-type', '.type', 'td:nth-child(1)']),
+            instrument_number: extractText(element, ['.instrument', '.doc-number', 'td:nth-child(2)']),
+            filed_date: extractText(element, ['.filed-date', '.date', 'td:nth-child(3)']),
+            grantor: extractText(element, ['.grantor', '.from', 'td:nth-child(4)']),
+            grantee: extractText(element, ['.grantee', '.to', 'td:nth-child(5)']),
+            legal_description: extractText(element, ['.legal-desc', '.description', 'td:nth-child(6)']),
+            volume: extractText(element, ['.volume', 'td:nth-child(7)']),
+            page: extractText(element, ['.page', 'td:nth-child(8)'])
+        };
+
+        // Only return if we have at least some data
+        if (record.document_type || record.grantor || record.grantee) {
+            return record;
+        }
+    } catch (error) {
+        console.error('Record parsing error:', error);
+    }
+
+    return null;
+}
+
+function extractText(element, selectors) {
+    /**
+     * Extract text from element using multiple selector attempts
+     */
+    if (!element) return '';
+
+    // If selectors is an attribute name
+    if (typeof selectors === 'string' && selectors.startsWith('data-')) {
+        return element.getAttribute(selectors) || '';
+    }
+
+    // Try each selector
+    for (const selector of selectors) {
+        try {
+            if (selector.startsWith('.') || selector.startsWith('[') || selector.includes(':')) {
+                const found = element.querySelector(selector);
+                if (found && found.textContent) {
+                    return found.textContent.trim();
+                }
+            } else if (selector === 'id') {
+                return element.id || '';
+            }
+        } catch (e) {
+            continue;
+        }
+    }
+
+    return '';
+}
+
+function extractFromText(doc) {
+    /**
+     * Extract property information from page text when no structured data
+     */
+    const results = [];
+    const bodyText = doc.body ? doc.body.textContent : '';
+
+    // Look for patterns in text
+    const parcelPattern = /Parcel[:\s]+([A-Z0-9-]+)/gi;
+    const ownerPattern = /Owner[:\s]+([A-Za-z\s,]+)/gi;
+    const acreagePattern = /(\d+\.?\d*)\s*acres?/gi;
+
+    let match;
+    const foundParcels = new Set();
+
+    while ((match = parcelPattern.exec(bodyText)) !== null) {
+        const parcelId = match[1].trim();
+        if (!foundParcels.has(parcelId)) {
+            foundParcels.add(parcelId);
+
+            results.push({
+                id: 'PARCEL-' + parcelId,
+                source: 'Bosque County CAD',
+                document_type: 'Property Record',
+                instrument_number: parcelId,
+                filed_date: '',
+                grantor: '',
+                grantee: '',
+                legal_description: `Parcel ID: ${parcelId}`,
+                volume: '',
+                page: ''
+            });
+        }
+    }
+
+    return results;
+}
+
+function showSearchingMessage(searchValue) {
+    /**
+     * Show loading message while searching
+     */
+    const propertyInfo = document.getElementById('property-info');
+    const propertyDetails = document.getElementById('property-details');
+
+    if (propertyDetails) {
+        propertyDetails.innerHTML = `
+            <div style="padding: 30px; background: #f7fafc; border-radius: 8px; text-align: center;">
+                <div style="font-size: 48px; margin-bottom: 15px;">🔍</div>
+                <h4 style="color: var(--primary); margin-bottom: 10px;">Searching Clerk Records...</h4>
+                <p style="color: #666;">Searching for: <strong>${searchValue}</strong></p>
+                <p style="color: #999; font-size: 14px; margin-top: 10px;">
+                    Using CORS proxies to access Bosque County records
+                </p>
+            </div>
+        `;
+        propertyInfo.classList.remove('hidden');
+        propertyInfo.scrollIntoView({ behavior: 'smooth' });
+    }
+}
+
+function showClerkFallbackMessage() {
+    /**
+     * Show message when scraping is disabled
+     */
     const message = `
-        <div style="padding: 20px; background: #fff3cd; border-radius: 8px; border-left: 4px solid #ffc107;">
-            <h4 style="color: #856404; margin-bottom: 10px;">📋 Clerk Records API Not Configured</h4>
-            <p style="color: #856404; margin-bottom: 15px;">
-                The clerk records search requires a backend API to be deployed.
+        <div style="padding: 20px; background: #e6f2ff; border-radius: 8px; border-left: 4px solid var(--primary);">
+            <h4 style="color: var(--primary); margin-bottom: 10px;">📋 Clerk Records Search</h4>
+            <p style="color: #666; margin-bottom: 15px;">
+                Client-side scraping is currently disabled. Visit the official sites below to search manually:
             </p>
-            <p style="color: #856404; margin-bottom: 10px;">
-                <strong>To enable clerk records search:</strong>
-            </p>
-            <ol style="margin-left: 20px; color: #856404; line-height: 1.8;">
-                <li>Deploy the backend API (see backend/README.md)</li>
-                <li>Update CLERK_API.baseUrl in app.js with your API URL</li>
-                <li>Set CLERK_API.enabled = true</li>
-            </ol>
-            <p style="color: #856404; margin-top: 15px;">
-                <strong>Alternative:</strong> Visit
-                <a href="https://www.texasfile.com/" target="_blank" style="color: #667eea; font-weight: 600;">TexasFile</a> or
-                <a href="https://kofilequicklinks.com/Bosque/" target="_blank" style="color: #667eea; font-weight: 600;">KoFile</a>
-                to search records manually.
-            </p>
+            <ul style="margin-left: 20px; color: #666; line-height: 1.8;">
+                <li><a href="https://esearch.bosquecad.com/" target="_blank" style="color: var(--primary); font-weight: 600;">Bosque County CAD</a> - Property search</li>
+                <li><a href="https://www.texasfile.com/" target="_blank" style="color: var(--primary); font-weight: 600;">TexasFile</a> - Official deed records</li>
+                <li><a href="https://kofilequicklinks.com/Bosque/" target="_blank" style="color: var(--primary); font-weight: 600;">KoFile</a> - Historical records</li>
+            </ul>
         </div>
     `;
 
@@ -1530,9 +1718,25 @@ function showClerkAPIDisabledMessage() {
     if (propertyDetails) {
         propertyDetails.innerHTML = message;
         propertyInfo.classList.remove('hidden');
-    } else {
-        alert('Clerk Records API is not configured. See console for details.');
     }
+}
+
+async function getClerkDocument(documentId, source) {
+    /**
+     * View document on official site (opens in new tab)
+     */
+    let url = '';
+
+    if (source === 'TexasFile' || source === 'texasfile') {
+        url = `https://www.texasfile.com/document/${documentId}`;
+    } else if (source === 'KoFile' || source === 'kofile') {
+        url = `https://kofilequicklinks.com/Bosque/document/${documentId}`;
+    } else {
+        url = `https://esearch.bosquecad.com/property/${documentId}`;
+    }
+
+    window.open(url, '_blank');
+    return { viewed: true, url };
 }
 
 function displayClerkRecords(results, searchQuery) {
