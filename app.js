@@ -13,6 +13,10 @@ let currentDataCenterAnalysis = null;
 let map = null;
 let mapMarkers = [];
 let siteMarkersLayer = null;
+let drawnItems = null;
+let drawControl = null;
+let currentDrawnParcel = null;
+let parcelLayer = null;
 
 // Constants (matching Python CLI version)
 const SOLAR_CONSTANTS = {
@@ -614,8 +618,88 @@ function initializeMap() {
     // Create layer for site markers
     siteMarkersLayer = L.layerGroup().addTo(map);
 
+    // Create layer for parcels
+    parcelLayer = L.layerGroup().addTo(map);
+
+    // Initialize drawing tools
+    drawnItems = new L.FeatureGroup();
+    map.addLayer(drawnItems);
+
+    drawControl = new L.Control.Draw({
+        draw: {
+            polygon: {
+                allowIntersection: false,
+                showArea: true,
+                metric: false, // Use acres
+                shapeOptions: {
+                    color: '#f59e0b',
+                    fillOpacity: 0.3
+                }
+            },
+            polyline: {
+                shapeOptions: {
+                    color: '#667eea',
+                    weight: 3
+                }
+            },
+            rectangle: {
+                shapeOptions: {
+                    color: '#10b981',
+                    fillOpacity: 0.2
+                }
+            },
+            circle: false,
+            circlemarker: false,
+            marker: false
+        },
+        edit: {
+            featureGroup: drawnItems,
+            remove: true
+        }
+    });
+
+    // Handle drawing events
+    map.on(L.Draw.Event.CREATED, function (event) {
+        const layer = event.layer;
+        const type = event.layerType;
+
+        drawnItems.addLayer(layer);
+
+        if (type === 'polygon' || type === 'rectangle') {
+            currentDrawnParcel = layer;
+            const acres = calculatePolygonAcres(layer);
+            const sqft = acres * 43560;
+
+            document.getElementById('drawing-info').style.display = 'block';
+            document.getElementById('drawn-acres').textContent = acres.toFixed(2);
+            document.getElementById('drawn-sqft').textContent = sqft.toLocaleString(undefined, {maximumFractionDigits: 0});
+
+            // Add popup to polygon
+            layer.bindPopup(`
+                <div class="parcel-info-popup">
+                    <h4>📏 Drawn Parcel</h4>
+                    <div class="info-row">
+                        <div class="info-label">Area</div>
+                        <div class="info-value">${acres.toFixed(2)} acres (${sqft.toLocaleString()} sq ft)</div>
+                    </div>
+                    <button onclick="analyzeDrawnParcel()" style="margin-top: 10px; padding: 8px 16px; background: var(--primary); color: white; border: none; border-radius: 4px; cursor: pointer; width: 100%;">
+                        ⚡ Analyze for Solar/DC
+                    </button>
+                </div>
+            `);
+        } else if (type === 'polyline') {
+            const distance = calculatePolylineDistance(layer);
+            layer.bindPopup(`
+                <strong>Distance:</strong> ${distance.toFixed(2)} miles (${(distance * 5280).toFixed(0)} ft)
+            `).openPopup();
+        }
+    });
+
     // Load saved sites on map
     showAllSites();
+
+    // Load saved parcels
+    loadParcels();
 
     // Add click handler for map
     map.on('click', onMapClick);
@@ -887,6 +971,371 @@ function searchProperty() {
 
     propertyInfo.classList.remove('hidden');
     propertyInfo.scrollIntoView({ behavior: 'smooth' });
+}
+
+// ============================================================================
+// PARCEL DRAWING & MEASUREMENT FUNCTIONS
+// ============================================================================
+
+function startDrawingParcel() {
+    if (!map) {
+        alert('Please open the Map tab first');
+        return;
+    }
+
+    // Activate polygon drawing
+    const polygonDrawer = new L.Draw.Polygon(map, drawControl.options.draw.polygon);
+    polygonDrawer.enable();
+
+    alert('📏 Click on the map to draw parcel boundaries. Double-click to finish.');
+}
+
+function measureDistance() {
+    if (!map) {
+        alert('Please open the Map tab first');
+        return;
+    }
+
+    // Activate polyline drawing for distance measurement
+    const lineDrawer = new L.Draw.Polyline(map, drawControl.options.draw.polyline);
+    lineDrawer.enable();
+
+    alert('📍 Click on the map to measure distance. Double-click to finish.');
+}
+
+function clearDrawings() {
+    if (!map || !drawnItems) return;
+
+    drawnItems.clearLayers();
+    currentDrawnParcel = null;
+    document.getElementById('drawing-info').style.display = 'none';
+
+    alert('✅ All drawings cleared');
+}
+
+function saveParcel() {
+    if (!currentDrawnParcel) {
+        alert('Please draw a parcel boundary first');
+        return;
+    }
+
+    const acres = calculatePolygonAcres(currentDrawnParcel);
+    const coordinates = currentDrawnParcel.getLatLngs()[0].map(latlng => [latlng.lat, latlng.lng]);
+    const center = currentDrawnParcel.getBounds().getCenter();
+
+    const parcelName = prompt('Enter a name for this parcel:', 'Parcel ' + (getParcels().length + 1));
+    if (!parcelName) return;
+
+    const parcelData = {
+        id: generateParcelId(),
+        name: parcelName,
+        acres: acres,
+        sqft: acres * 43560,
+        coordinates: coordinates,
+        center: { lat: center.lat, lon: center.lng },
+        inBosqueCounty: isInBosqueCounty(center.lat, center.lng),
+        savedAt: new Date().toISOString(),
+        notes: ''
+    };
+
+    // Get existing parcels
+    const parcels = getParcels();
+    parcels.push(parcelData);
+    localStorage.setItem('eagle-parcels', JSON.stringify(parcels));
+
+    // Add to parcel layer
+    const polygon = L.polygon(coordinates, {
+        color: '#f59e0b',
+        fillOpacity: 0.3
+    }).addTo(parcelLayer);
+
+    polygon.bindPopup(createParcelPopup(parcelData));
+
+    alert(`✅ Parcel "${parcelName}" saved! (${acres.toFixed(2)} acres)`);
+}
+
+function analyzeDrawnParcel() {
+    if (!currentDrawnParcel) {
+        alert('No parcel drawn');
+        return;
+    }
+
+    const acres = calculatePolygonAcres(currentDrawnParcel);
+    const center = currentDrawnParcel.getBounds().getCenter();
+
+    // Set GPS to parcel center
+    currentGPSData = {
+        latitude: center.lat,
+        longitude: center.lng,
+        accuracy: 10,
+        timestamp: new Date().toISOString()
+    };
+
+    const choice = confirm(`Analyze this ${acres.toFixed(2)}-acre parcel?\n\nClick OK for Solar Farm, Cancel for Data Center`);
+
+    // Switch to appropriate tab with pre-filled data
+    if (choice) {
+        // Solar farm analysis
+        document.getElementById('solar-acres').value = acres.toFixed(2);
+        showTab('solar');
+    } else {
+        // Data center analysis
+        showTab('datacenter');
+    }
+
+    map.closePopup();
+}
+
+function calculatePolygonAcres(layer) {
+    const latlngs = layer.getLatLngs()[0];
+    let area = 0;
+
+    // Use spherical excess formula for better accuracy
+    const R = 20902231; // Earth radius in feet
+
+    for (let i = 0; i < latlngs.length; i++) {
+        const j = (i + 1) % latlngs.length;
+        const lat1 = latlngs[i].lat * Math.PI / 180;
+        const lat2 = latlngs[j].lat * Math.PI / 180;
+        const lon1 = latlngs[i].lng * Math.PI / 180;
+        const lon2 = latlngs[j].lng * Math.PI / 180;
+
+        area += (lon2 - lon1) * (2 + Math.sin(lat1) + Math.sin(lat2));
+    }
+
+    area = Math.abs(area * R * R / 2.0);
+    return area / 43560; // Convert square feet to acres
+}
+
+function calculatePolylineDistance(layer) {
+    const latlngs = layer.getLatLngs();
+    let totalDistance = 0;
+
+    for (let i = 0; i < latlngs.length - 1; i++) {
+        totalDistance += calculateDistance(
+            latlngs[i].lat,
+            latlngs[i].lng,
+            latlngs[i + 1].lat,
+            latlngs[i + 1].lng
+        );
+    }
+
+    return totalDistance;
+}
+
+// ============================================================================
+// PROPERTY/PARCEL DATA MANAGEMENT
+// ============================================================================
+
+function getParcels() {
+    const parcelsJSON = localStorage.getItem('eagle-parcels');
+    return parcelsJSON ? JSON.parse(parcelsJSON) : [];
+}
+
+function generateParcelId() {
+    return 'PARCEL-' + Date.now();
+}
+
+function loadParcels() {
+    if (!map || !parcelLayer) return;
+
+    parcelLayer.clearLayers();
+    const parcels = getParcels();
+
+    parcels.forEach(parcel => {
+        if (!parcel.coordinates) return;
+
+        const polygon = L.polygon(parcel.coordinates, {
+            color: '#f59e0b',
+            fillOpacity: 0.3,
+            weight: 2
+        }).addTo(parcelLayer);
+
+        polygon.bindPopup(createParcelPopup(parcel));
+    });
+}
+
+function createParcelPopup(parcel) {
+    return `
+        <div class="parcel-info-popup">
+            <h4>📐 ${parcel.name}</h4>
+            <div class="info-row">
+                <div class="info-label">Area</div>
+                <div class="info-value">${parcel.acres.toFixed(2)} acres</div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">Square Feet</div>
+                <div class="info-value">${parcel.sqft.toLocaleString()} sq ft</div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">Location</div>
+                <div class="info-value">${parcel.center.lat.toFixed(4)}°N, ${Math.abs(parcel.center.lon).toFixed(4)}°W</div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">Territory</div>
+                <div class="info-value">${parcel.inBosqueCounty ? 'Bosque County' : 'Outside County'}</div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">Saved</div>
+                <div class="info-value">${new Date(parcel.savedAt).toLocaleDateString()}</div>
+            </div>
+            ${parcel.owner ? `
+            <div class="info-row">
+                <div class="info-label">Owner</div>
+                <div class="info-value">${parcel.owner}</div>
+            </div>` : ''}
+            ${parcel.parcelId ? `
+            <div class="info-row">
+                <div class="info-label">Parcel ID</div>
+                <div class="info-value">${parcel.parcelId}</div>
+            </div>` : ''}
+        </div>
+    `;
+}
+
+// ============================================================================
+// CAD DATA SCRAPER & INTEGRATION
+// ============================================================================
+
+async function scrapeCADProperty(searchType, searchValue) {
+    // Attempt to scrape property data from Bosque CAD
+    // Note: This will likely fail due to CORS restrictions
+    // In production, this would need a server-side proxy
+
+    const cadUrl = 'https://esearch.bosquecad.com/';
+
+    try {
+        // Try direct fetch (will likely fail due to CORS)
+        const response = await fetch(cadUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({
+                searchType: searchType,
+                searchValue: searchValue
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error('CAD site returned error');
+        }
+
+        const html = await response.text();
+        return parseCADResponse(html);
+
+    } catch (error) {
+        console.log('CAD scraping failed (expected due to CORS):', error);
+
+        // Fallback: Show manual input form
+        showManualPropertyInput(searchType, searchValue);
+        return null;
+    }
+}
+
+function parseCADResponse(html) {
+    // Parse HTML response from CAD site to extract property data
+    // This would need to be customized based on the actual CAD site structure
+
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+
+    // Extract property data (customize selectors based on actual site)
+    const propertyData = {
+        owner: doc.querySelector('.owner')?.textContent || '',
+        parcelId: doc.querySelector('.parcel-id')?.textContent || '',
+        address: doc.querySelector('.address')?.textContent || '',
+        acres: parseFloat(doc.querySelector('.acreage')?.textContent) || 0,
+        value: doc.querySelector('.assessed-value')?.textContent || '',
+        legalDescription: doc.querySelector('.legal-desc')?.textContent || ''
+    };
+
+    return propertyData;
+}
+
+function showManualPropertyInput(searchType, searchValue) {
+    const propertyDetails = document.getElementById('property-details');
+
+    propertyDetails.innerHTML = `
+        <div style="padding: 20px; background: #f7fafc; border-radius: 8px;">
+            <h4 style="color: var(--primary); margin-bottom: 15px;">📝 Manual Property Data Entry</h4>
+            <p style="margin-bottom: 15px; color: #666;">
+                Direct CAD scraping is restricted. Please manually enter property data from
+                <a href="https://esearch.bosquecad.com/" target="_blank" style="color: var(--primary); font-weight: 600;">Bosque County CAD</a>.
+            </p>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Owner Name</label>
+                    <input type="text" id="manual-owner" placeholder="Property owner">
+                </div>
+                <div class="form-group">
+                    <label>Parcel ID</label>
+                    <input type="text" id="manual-parcel-id" placeholder="CAD parcel ID">
+                </div>
+                <div class="form-group">
+                    <label>Address</label>
+                    <input type="text" id="manual-address" placeholder="Property address">
+                </div>
+                <div class="form-group">
+                    <label>Acreage</label>
+                    <input type="number" id="manual-acres" placeholder="0.00" step="0.01">
+                </div>
+                <div class="form-group">
+                    <label>Assessed Value</label>
+                    <input type="text" id="manual-value" placeholder="$0">
+                </div>
+                <div class="form-group">
+                    <label>Legal Description</label>
+                    <textarea id="manual-legal" placeholder="Legal description" rows="3"></textarea>
+                </div>
+            </div>
+
+            <div style="margin-top: 20px;">
+                <button onclick="saveManualPropertyData()"
+                        style="padding: 12px 24px; background: var(--primary); color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer;">
+                    💾 Save Property Data & Draw on Map
+                </button>
+            </div>
+        </div>
+    `;
+
+    document.getElementById('property-info').classList.remove('hidden');
+}
+
+function saveManualPropertyData() {
+    const propertyData = {
+        id: 'PROP-' + Date.now(),
+        owner: document.getElementById('manual-owner').value,
+        parcelId: document.getElementById('manual-parcel-id').value,
+        address: document.getElementById('manual-address').value,
+        acres: parseFloat(document.getElementById('manual-acres').value) || 0,
+        value: document.getElementById('manual-value').value,
+        legalDescription: document.getElementById('manual-legal').value,
+        savedAt: new Date().toISOString()
+    };
+
+    if (!propertyData.owner && !propertyData.parcelId) {
+        alert('Please enter at least Owner Name or Parcel ID');
+        return;
+    }
+
+    // Save to localStorage
+    const properties = getProperties();
+    properties.push(propertyData);
+    localStorage.setItem('eagle-properties', JSON.stringify(properties));
+
+    alert(`✅ Property data saved!\n\nNow use the "📏 Draw Parcel Boundary" tool to outline this property on the map.`);
+
+    // Enable drawing mode
+    setTimeout(() => {
+        startDrawingParcel();
+    }, 500);
+}
+
+function getProperties() {
+    const propsJSON = localStorage.getItem('eagle-properties');
+    return propsJSON ? JSON.parse(propsJSON) : [];
 }
 
 // ============================================================================

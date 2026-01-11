@@ -16,6 +16,12 @@
             integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
             crossorigin=""></script>
 
+    <!-- Leaflet Draw CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css"/>
+
+    <!-- Leaflet Draw JavaScript -->
+    <script src="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.js"></script>
+
     <style>
         * {
             margin: 0;
@@ -436,6 +442,101 @@
             background: #dbeafe;
             color: #1e40af;
         }
+
+        /* Drawing and Measurement Tools */
+        .leaflet-draw-toolbar {
+            margin-top: 10px !important;
+        }
+
+        .measurement-info {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .parcel-form {
+            background: #f7fafc;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        .parcel-info-popup {
+            min-width: 250px;
+        }
+
+        .parcel-info-popup h4 {
+            color: var(--primary);
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .parcel-info-popup .info-row {
+            margin: 8px 0;
+            padding: 6px 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .parcel-info-popup .info-label {
+            font-weight: 600;
+            color: #666;
+            font-size: 12px;
+        }
+
+        .parcel-info-popup .info-value {
+            color: #2d3748;
+            font-size: 14px;
+        }
+
+        .draw-controls {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .draw-controls h4 {
+            color: var(--primary);
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .tool-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .tool-btn {
+            padding: 8px 16px;
+            border: 2px solid var(--primary);
+            background: white;
+            color: var(--primary);
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .tool-btn:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .tool-btn.active {
+            background: var(--primary);
+            color: white;
+        }
     </style>
 </head>
 <body>
@@ -662,6 +763,21 @@
                     <div class="form-group">
                         <label for="search-input">Search Value</label>
                         <input type="text" id="search-input" placeholder="Enter owner name">
+                    </div>
+                </div>
+
+                <!-- Drawing and Measurement Tools -->
+                <div class="draw-controls">
+                    <h4>📐 Parcel Drawing & Measurement Tools</h4>
+                    <div class="tool-buttons">
+                        <button class="tool-btn" onclick="startDrawingParcel()">📏 Draw Parcel Boundary</button>
+                        <button class="tool-btn" onclick="measureDistance()">📍 Measure Distance</button>
+                        <button class="tool-btn" onclick="clearDrawings()">🗑️ Clear Drawings</button>
+                        <button class="tool-btn" onclick="saveParcel()">💾 Save Parcel</button>
+                    </div>
+                    <div id="drawing-info" style="margin-top: 10px; padding: 10px; background: #e6f2ff; border-radius: 4px; display: none;">
+                        <strong>📋 Drawn Parcel:</strong> <span id="drawn-acres">0</span> acres |
+                        <span id="drawn-sqft">0</span> sq ft
                     </div>
                 </div>
 
