@@ -5,6 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="HH Holdings Energy Infrastructure Intelligence - Mobile field analysis tool for solar farms and data centers">
     <title>EAGLE - HH Holdings Energy Intel</title>
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+          crossorigin=""/>
+
+    <!-- Leaflet JavaScript -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+            crossorigin=""></script>
+
     <style>
         * {
             margin: 0;
@@ -369,6 +380,62 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+
+        /* Map Styles */
+        #map {
+            height: 600px;
+            width: 100%;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .map-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .leaflet-popup-content-wrapper {
+            border-radius: 8px;
+        }
+
+        .leaflet-popup-content {
+            margin: 15px;
+            font-size: 14px;
+        }
+
+        .popup-title {
+            font-weight: 600;
+            font-size: 16px;
+            color: var(--primary);
+            margin-bottom: 8px;
+        }
+
+        .popup-details {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .popup-type {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .popup-type.solar {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .popup-type.datacenter {
+            background: #dbeafe;
+            color: #1e40af;
+        }
     </style>
 </head>
 <body>
@@ -385,6 +452,7 @@
             <button class="tab-button active" onclick="showTab('gps')">📍 GPS Capture</button>
             <button class="tab-button" onclick="showTab('solar')">☀️ Solar Farm</button>
             <button class="tab-button" onclick="showTab('datacenter')">🖥️ Data Center</button>
+            <button class="tab-button" onclick="showTab('map')">🗺️ Map & CAD</button>
             <button class="tab-button" onclick="showTab('database')">💾 Site Database</button>
         </div>
 
@@ -570,6 +638,58 @@
                         <button class="btn-success" onclick="saveSite('datacenter')">💾 Save to Database</button>
                         <button class="btn-secondary" onclick="exportSiteJSON('datacenter')">📤 Export JSON</button>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Map & CAD Tab -->
+        <div id="map-tab" class="tab-content hidden">
+            <div class="card">
+                <h2>Interactive Map & Property Search</h2>
+                <p style="margin-bottom: 20px; color: #666;">View saved sites, capture GPS locations, and search Bosque County property records.</p>
+
+                <!-- Property Search -->
+                <div class="form-grid" style="margin-bottom: 20px;">
+                    <div class="form-group">
+                        <label for="search-type">Search By</label>
+                        <select id="search-type" onchange="updateSearchPlaceholder()">
+                            <option value="owner">Owner Name</option>
+                            <option value="address">Property Address</option>
+                            <option value="parcel">Parcel ID</option>
+                            <option value="acreage">Min Acreage</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="search-input">Search Value</label>
+                        <input type="text" id="search-input" placeholder="Enter owner name">
+                    </div>
+                </div>
+
+                <div class="map-controls">
+                    <button class="btn-primary" onclick="searchProperty()">🔍 Search Property</button>
+                    <button class="btn-secondary" onclick="showAllSites()">📍 Show All Sites</button>
+                    <button class="btn-secondary" onclick="centerOnBosque()">🎯 Center on Bosque County</button>
+                    <button class="btn-secondary" onclick="addCurrentLocation()">📡 Add Current Location</button>
+                </div>
+
+                <!-- Map Container -->
+                <div id="map"></div>
+
+                <!-- Property Info Display -->
+                <div id="property-info" class="card hidden" style="margin-top: 20px;">
+                    <h3>Property Information</h3>
+                    <div id="property-details"></div>
+                </div>
+
+                <!-- CAD Link -->
+                <div style="margin-top: 20px; padding: 15px; background: #f7fafc; border-radius: 8px; text-align: center;">
+                    <p style="color: #666; margin-bottom: 10px;">For official property records and detailed information:</p>
+                    <a href="https://esearch.bosquecad.com/" target="_blank" style="color: var(--primary); font-weight: 600; text-decoration: none;">
+                        🔗 Visit Bosque County CAD Official Site
+                    </a>
+                    <p style="color: #999; font-size: 0.9em; margin-top: 10px;">
+                        Search by Owner, Address, or Property ID | Verify all information with the Appraisal District
+                    </p>
                 </div>
             </div>
         </div>

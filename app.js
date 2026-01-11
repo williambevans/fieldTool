@@ -10,6 +10,9 @@
 let currentGPSData = null;
 let currentSolarAnalysis = null;
 let currentDataCenterAnalysis = null;
+let map = null;
+let mapMarkers = [];
+let siteMarkersLayer = null;
 
 // Constants (matching Python CLI version)
 const SOLAR_CONSTANTS = {
@@ -64,6 +67,11 @@ function showTab(tabName) {
     // Load sites if database tab
     if (tabName === 'database') {
         loadSites();
+    }
+
+    // Initialize map if map tab
+    if (tabName === 'map') {
+        initializeMap();
     }
 }
 
@@ -561,6 +569,324 @@ function exportAllSitesCSV() {
     a.click();
     window.URL.revokeObjectURL(url);
     document.body.removeChild(a);
+}
+
+// ============================================================================
+// MAP & PROPERTY SEARCH FUNCTIONS
+// ============================================================================
+
+function initializeMap() {
+    // Only initialize once
+    if (map) {
+        map.invalidateSize(); // Refresh map size
+        return;
+    }
+
+    // Create map centered on Bosque County
+    map = L.map('map').setView([BOSQUE_COUNTY.center.lat, BOSQUE_COUNTY.center.lon], 11);
+
+    // Add OpenStreetMap tiles
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors',
+        maxZoom: 19
+    }).addTo(map);
+
+    // Add Bosque County boundary rectangle
+    const bounds = [
+        [BOSQUE_COUNTY.bounds.minLat, BOSQUE_COUNTY.bounds.minLon],
+        [BOSQUE_COUNTY.bounds.maxLat, BOSQUE_COUNTY.bounds.maxLon]
+    ];
+    L.rectangle(bounds, {
+        color: '#667eea',
+        weight: 3,
+        fillOpacity: 0.1
+    }).addTo(map).bindPopup('<strong>Bosque County</strong><br>Oncor Territory');
+
+    // Add Brazos River marker
+    L.marker([BOSQUE_COUNTY.brazosRiver.lat, BOSQUE_COUNTY.brazosRiver.lon], {
+        icon: L.divIcon({
+            className: 'custom-icon',
+            html: '🌊',
+            iconSize: [30, 30]
+        })
+    }).addTo(map).bindPopup('<strong>Brazos River</strong><br>Water source for cooling');
+
+    // Create layer for site markers
+    siteMarkersLayer = L.layerGroup().addTo(map);
+
+    // Load saved sites on map
+    showAllSites();
+
+    // Add click handler for map
+    map.on('click', onMapClick);
+}
+
+function onMapClick(e) {
+    const lat = e.latlng.lat.toFixed(6);
+    const lon = e.latlng.lng.toFixed(6);
+    const inBosque = isInBosqueCounty(parseFloat(lat), parseFloat(lon));
+
+    const popup = L.popup()
+        .setLatLng(e.latlng)
+        .setContent(`
+            <div class="popup-content">
+                <div class="popup-title">📍 Location</div>
+                <div class="popup-details">
+                    <strong>Coordinates:</strong><br>
+                    ${lat}°N, ${Math.abs(lon)}°W<br><br>
+                    <strong>Territory:</strong><br>
+                    ${inBosque ? '✅ Bosque County (Oncor)' : '❌ Outside Bosque County'}<br><br>
+                    <button onclick="captureThisLocation(${lat}, ${lon})" style="padding: 8px 16px; background: var(--primary); color: white; border: none; border-radius: 4px; cursor: pointer;">
+                        📡 Use This Location
+                    </button>
+                </div>
+            </div>
+        `)
+        .openOn(map);
+}
+
+function captureThisLocation(lat, lon) {
+    currentGPSData = {
+        latitude: lat,
+        longitude: lon,
+        accuracy: 10, // Approximate from map click
+        timestamp: new Date().toISOString()
+    };
+    alert(`✅ GPS set to: ${lat}°N, ${Math.abs(lon)}°W\nYou can now use this location for solar or datacenter analysis.`);
+    map.closePopup();
+}
+
+function showAllSites() {
+    if (!map) return;
+
+    // Clear existing markers
+    siteMarkersLayer.clearLayers();
+
+    const sites = getSites();
+
+    sites.forEach(site => {
+        if (!site.gps) return;
+
+        const lat = site.gps.latitude;
+        const lon = site.gps.longitude;
+
+        // Determine icon and color
+        let icon, color;
+        if (site.type === 'solar') {
+            icon = '☀️';
+            color = '#f59e0b';
+        } else {
+            icon = '🖥️';
+            color = '#3b82f6';
+        }
+
+        // Create custom marker
+        const marker = L.marker([lat, lon], {
+            icon: L.divIcon({
+                className: 'custom-icon',
+                html: `<div style="font-size: 24px;">${icon}</div>`,
+                iconSize: [30, 30]
+            })
+        });
+
+        // Create popup content
+        let popupContent = `
+            <div class="popup-content">
+                <div class="popup-title">${site.name}</div>
+                <span class="popup-type ${site.type}">${site.type.toUpperCase()}</span>
+                <div class="popup-details">
+        `;
+
+        if (site.type === 'solar') {
+            popupContent += `
+                <strong>Solar Farm</strong><br>
+                📏 ${site.acres} acres<br>
+                ⚡ ${site.mwCapacity.toFixed(2)} MW capacity<br>
+                🏠 Powers ${site.homesPowered.toLocaleString()} homes<br>
+                💰 $${site.annualRevenue.toLocaleString()} annual revenue
+            `;
+        } else {
+            popupContent += `
+                <strong>Data Center</strong><br>
+                🖥️ ${site.servers} servers<br>
+                ⚡ ${site.totalFacilityMW.toFixed(2)} MW total load<br>
+                🏢 ${site.buildingSqFt.toLocaleString()} sq ft<br>
+                📊 PUE: ${site.pue}
+            `;
+        }
+
+        popupContent += `
+                <br><br>
+                📍 ${lat.toFixed(4)}°N, ${Math.abs(lon).toFixed(4)}°W<br>
+                📅 Saved: ${new Date(site.savedAt).toLocaleDateString()}
+                </div>
+            </div>
+        `;
+
+        marker.bindPopup(popupContent);
+        siteMarkersLayer.addLayer(marker);
+    });
+
+    // Fit map to show all markers if any exist
+    if (sites.filter(s => s.gps).length > 0) {
+        const bounds = [];
+        sites.forEach(site => {
+            if (site.gps) {
+                bounds.push([site.gps.latitude, site.gps.longitude]);
+            }
+        });
+        if (bounds.length > 0) {
+            map.fitBounds(bounds, { padding: [50, 50] });
+        }
+    }
+}
+
+function centerOnBosque() {
+    if (!map) return;
+    map.setView([BOSQUE_COUNTY.center.lat, BOSQUE_COUNTY.center.lon], 11);
+}
+
+function addCurrentLocation() {
+    if (!navigator.geolocation) {
+        alert('GPS not supported by your browser');
+        return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+        (position) => {
+            const lat = position.coords.latitude;
+            const lon = position.coords.longitude;
+
+            if (!map) {
+                initializeMap();
+            }
+
+            // Add marker for current location
+            const marker = L.marker([lat, lon], {
+                icon: L.divIcon({
+                    className: 'custom-icon',
+                    html: '<div style="font-size: 24px;">📍</div>',
+                    iconSize: [30, 30]
+                })
+            }).addTo(map);
+
+            const inBosque = isInBosqueCounty(lat, lon);
+
+            marker.bindPopup(`
+                <div class="popup-content">
+                    <div class="popup-title">Your Current Location</div>
+                    <div class="popup-details">
+                        <strong>Coordinates:</strong><br>
+                        ${lat.toFixed(6)}°N, ${Math.abs(lon).toFixed(6)}°W<br><br>
+                        <strong>Accuracy:</strong> ±${position.coords.accuracy.toFixed(1)}m<br><br>
+                        <strong>Territory:</strong><br>
+                        ${inBosque ? '✅ Bosque County (Oncor)' : '❌ Outside Bosque County'}
+                    </div>
+                </div>
+            `).openPopup();
+
+            map.setView([lat, lon], 15);
+
+            // Store GPS data
+            currentGPSData = {
+                latitude: lat,
+                longitude: lon,
+                accuracy: position.coords.accuracy,
+                timestamp: new Date().toISOString()
+            };
+        },
+        (error) => {
+            alert('GPS error: ' + error.message);
+        },
+        { enableHighAccuracy: true, timeout: 30000 }
+    );
+}
+
+function updateSearchPlaceholder() {
+    const searchType = document.getElementById('search-type').value;
+    const searchInput = document.getElementById('search-input');
+
+    const placeholders = {
+        owner: 'Enter owner name (e.g., Smith)',
+        address: 'Enter street name or address',
+        parcel: 'Enter parcel ID',
+        acreage: 'Enter minimum acreage (e.g., 100)'
+    };
+
+    searchInput.placeholder = placeholders[searchType] || 'Enter search value';
+}
+
+function searchProperty() {
+    const searchType = document.getElementById('search-type').value;
+    const searchValue = document.getElementById('search-input').value.trim();
+
+    if (!searchValue) {
+        alert('Please enter a search value');
+        return;
+    }
+
+    // Since we can't directly access CAD database, show instructions
+    const propertyInfo = document.getElementById('property-info');
+    const propertyDetails = document.getElementById('property-details');
+
+    let searchUrl = 'https://esearch.bosquecad.com/';
+    let searchInstructions = '';
+
+    switch (searchType) {
+        case 'owner':
+            searchInstructions = `Search for properties owned by: <strong>${searchValue}</strong>`;
+            break;
+        case 'address':
+            searchInstructions = `Search for property at: <strong>${searchValue}</strong>`;
+            break;
+        case 'parcel':
+            searchInstructions = `Search for parcel ID: <strong>${searchValue}</strong>`;
+            break;
+        case 'acreage':
+            searchInstructions = `Filter for properties with minimum <strong>${searchValue} acres</strong>`;
+            break;
+    }
+
+    propertyDetails.innerHTML = `
+        <div style="padding: 20px; background: #f7fafc; border-radius: 8px; margin-top: 15px;">
+            <h4 style="color: var(--primary); margin-bottom: 15px;">🔍 Property Search</h4>
+            <p style="margin-bottom: 15px;">${searchInstructions}</p>
+
+            <p style="margin-bottom: 15px; color: #666;">
+                To access official Bosque County property records:
+            </p>
+
+            <ol style="margin-left: 20px; margin-bottom: 20px; line-height: 1.8;">
+                <li>Visit the <a href="${searchUrl}" target="_blank" style="color: var(--primary); font-weight: 600;">Bosque County CAD site</a></li>
+                <li>Select the "${searchType}" search tab</li>
+                <li>Enter: "${searchValue}"</li>
+                <li>View property details including:
+                    <ul style="margin-left: 20px; margin-top: 5px;">
+                        <li>Property value & assessed value</li>
+                        <li>Legal description & acreage</li>
+                        <li>Owner information</li>
+                        <li>Improvement details</li>
+                        <li>Tax information</li>
+                    </ul>
+                </li>
+            </ol>
+
+            <div style="background: #fff3cd; padding: 12px; border-radius: 6px; border-left: 4px solid #ffc107;">
+                <strong>⚠️ Note:</strong> All property information should be verified with the Bosque County Appraisal District for legal purposes.
+            </div>
+
+            <div style="margin-top: 20px; text-align: center;">
+                <a href="${searchUrl}" target="_blank"
+                   style="display: inline-block; padding: 12px 24px; background: var(--primary); color: white;
+                          text-decoration: none; border-radius: 6px; font-weight: 600;">
+                    🔗 Open Bosque County CAD
+                </a>
+            </div>
+        </div>
+    `;
+
+    propertyInfo.classList.remove('hidden');
+    propertyInfo.scrollIntoView({ behavior: 'smooth' });
 }
 
 // ============================================================================
