@@ -47,6 +47,14 @@ const BOSQUE_COUNTY = {
     brazosRiver: { lat: 31.8500, lon: -97.6000 }
 };
 
+// Clerk Records API Configuration
+const CLERK_API = {
+    // Update this URL when you deploy the backend
+    baseUrl: 'http://localhost:5000/api',  // Change to your deployed API URL
+    enabled: false,  // Set to true when API is deployed
+    timeout: 10000
+};
+
 // ============================================================================
 // TAB NAVIGATION
 // ============================================================================
@@ -900,7 +908,7 @@ function updateSearchPlaceholder() {
     searchInput.placeholder = placeholders[searchType] || 'Enter search value';
 }
 
-function searchProperty() {
+async function searchProperty() {
     const searchType = document.getElementById('search-type').value;
     const searchValue = document.getElementById('search-input').value.trim();
 
@@ -909,7 +917,31 @@ function searchProperty() {
         return;
     }
 
-    // Since we can't directly access CAD database, show instructions
+    // Try clerk records API first
+    if (CLERK_API.enabled) {
+        let apiSearchType = 'name';
+        let additionalParams = {};
+
+        if (searchType === 'owner') {
+            apiSearchType = 'name';
+        } else if (searchType === 'address' || searchType === 'parcel') {
+            apiSearchType = 'property';
+            if (searchType === 'parcel') {
+                additionalParams.property_id = searchValue;
+            } else {
+                additionalParams.address = searchValue;
+            }
+        }
+
+        const results = await searchClerkRecords(apiSearchType, searchValue, additionalParams);
+
+        if (results && results.success) {
+            displayClerkRecords(results.results, searchValue);
+            return;
+        }
+    }
+
+    // Fallback to manual search instructions
     const propertyInfo = document.getElementById('property-info');
     const propertyDetails = document.getElementById('property-details');
 
@@ -1336,6 +1368,282 @@ function saveManualPropertyData() {
 function getProperties() {
     const propsJSON = localStorage.getItem('eagle-properties');
     return propsJSON ? JSON.parse(propsJSON) : [];
+}
+
+// ============================================================================
+// CLERK RECORDS API INTEGRATION
+// ============================================================================
+
+async function searchClerkRecords(searchType, searchValue, additionalParams = {}) {
+    /**
+     * Search Bosque County clerk records via backend API
+     *
+     * @param searchType - 'name', 'property', or 'date'
+     * @param searchValue - Search value (name, property_id, or date range)
+     * @param additionalParams - Additional parameters (type, address, etc.)
+     */
+
+    if (!CLERK_API.enabled) {
+        console.log('Clerk API is disabled. Enable by setting CLERK_API.enabled = true');
+        showClerkAPIDisabledMessage();
+        return null;
+    }
+
+    try {
+        let url = `${CLERK_API.baseUrl}/clerk/search/${searchType}`;
+        const params = new URLSearchParams();
+
+        // Build query parameters based on search type
+        if (searchType === 'name') {
+            params.append('name', searchValue);
+            if (additionalParams.type) {
+                params.append('type', additionalParams.type);
+            }
+        } else if (searchType === 'property') {
+            if (additionalParams.property_id) {
+                params.append('property_id', additionalParams.property_id);
+            }
+            if (additionalParams.address) {
+                params.append('address', additionalParams.address);
+            }
+        } else if (searchType === 'date') {
+            params.append('start_date', additionalParams.start_date);
+            params.append('end_date', additionalParams.end_date);
+            if (additionalParams.type) {
+                params.append('type', additionalParams.type);
+            }
+        }
+
+        url += '?' + params.toString();
+
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            signal: AbortSignal.timeout(CLERK_API.timeout)
+        });
+
+        if (!response.ok) {
+            throw new Error(`API returned ${response.status}: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        return data;
+
+    } catch (error) {
+        console.error('Clerk records search error:', error);
+
+        if (error.name === 'AbortError') {
+            alert('Search timeout. The clerk records service may be unavailable.');
+        } else {
+            alert(`Error searching clerk records: ${error.message}`);
+        }
+
+        return null;
+    }
+}
+
+async function getClerkDocument(documentId, source = 'texasfile') {
+    /**
+     * Retrieve full document details from clerk records
+     */
+
+    if (!CLERK_API.enabled) {
+        showClerkAPIDisabledMessage();
+        return null;
+    }
+
+    try {
+        const url = `${CLERK_API.baseUrl}/clerk/document/${documentId}?source=${source}`;
+
+        const response = await fetch(url, {
+            method: 'GET',
+            signal: AbortSignal.timeout(CLERK_API.timeout)
+        });
+
+        if (!response.ok) {
+            throw new Error(`Document not found: ${response.status}`);
+        }
+
+        const data = await response.json();
+        return data.document;
+
+    } catch (error) {
+        console.error('Document retrieval error:', error);
+        alert(`Error retrieving document: ${error.message}`);
+        return null;
+    }
+}
+
+async function getClerkRecordTypes() {
+    /**
+     * Get list of available record types
+     */
+
+    if (!CLERK_API.enabled) {
+        return [];
+    }
+
+    try {
+        const url = `${CLERK_API.baseUrl}/clerk/types`;
+        const response = await fetch(url);
+
+        if (response.ok) {
+            const data = await response.json();
+            return data.record_types;
+        }
+    } catch (error) {
+        console.error('Error fetching record types:', error);
+    }
+
+    return [];
+}
+
+function showClerkAPIDisabledMessage() {
+    const message = `
+        <div style="padding: 20px; background: #fff3cd; border-radius: 8px; border-left: 4px solid #ffc107;">
+            <h4 style="color: #856404; margin-bottom: 10px;">📋 Clerk Records API Not Configured</h4>
+            <p style="color: #856404; margin-bottom: 15px;">
+                The clerk records search requires a backend API to be deployed.
+            </p>
+            <p style="color: #856404; margin-bottom: 10px;">
+                <strong>To enable clerk records search:</strong>
+            </p>
+            <ol style="margin-left: 20px; color: #856404; line-height: 1.8;">
+                <li>Deploy the backend API (see backend/README.md)</li>
+                <li>Update CLERK_API.baseUrl in app.js with your API URL</li>
+                <li>Set CLERK_API.enabled = true</li>
+            </ol>
+            <p style="color: #856404; margin-top: 15px;">
+                <strong>Alternative:</strong> Visit
+                <a href="https://www.texasfile.com/" target="_blank" style="color: #667eea; font-weight: 600;">TexasFile</a> or
+                <a href="https://kofilequicklinks.com/Bosque/" target="_blank" style="color: #667eea; font-weight: 600;">KoFile</a>
+                to search records manually.
+            </p>
+        </div>
+    `;
+
+    const propertyInfo = document.getElementById('property-info');
+    const propertyDetails = document.getElementById('property-details');
+
+    if (propertyDetails) {
+        propertyDetails.innerHTML = message;
+        propertyInfo.classList.remove('hidden');
+    } else {
+        alert('Clerk Records API is not configured. See console for details.');
+    }
+}
+
+function displayClerkRecords(results, searchQuery) {
+    /**
+     * Display clerk records search results on the page
+     */
+
+    const propertyInfo = document.getElementById('property-info');
+    const propertyDetails = document.getElementById('property-details');
+
+    if (!results || results.length === 0) {
+        propertyDetails.innerHTML = `
+            <div style="padding: 20px; background: #f7fafc; border-radius: 8px;">
+                <h4 style="color: var(--primary); margin-bottom: 15px;">📋 No Records Found</h4>
+                <p style="color: #666;">
+                    No clerk records were found for: <strong>${searchQuery}</strong>
+                </p>
+                <p style="color: #666; margin-top: 10px;">
+                    Try searching with different terms or visit the
+                    <a href="https://www.texasfile.com/" target="_blank" style="color: var(--primary); font-weight: 600;">
+                        official clerk records portal
+                    </a>.
+                </p>
+            </div>
+        `;
+        propertyInfo.classList.remove('hidden');
+        return;
+    }
+
+    let html = `
+        <div style="padding: 20px; background: #f7fafc; border-radius: 8px;">
+            <h4 style="color: var(--primary); margin-bottom: 15px;">
+                📋 Clerk Records Found: ${results.length} ${results.length === 1 ? 'Record' : 'Records'}
+            </h4>
+            <p style="color: #666; margin-bottom: 20px;">
+                Search: <strong>${searchQuery}</strong>
+            </p>
+    `;
+
+    results.forEach((record, index) => {
+        html += `
+            <div style="background: white; padding: 15px; border-radius: 6px; margin-bottom: 15px; border-left: 4px solid var(--primary);">
+                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">
+                    <strong style="color: var(--primary); font-size: 16px;">
+                        ${record.document_type || 'Document'} #${record.instrument_number || record.id}
+                    </strong>
+                    <span style="background: #e6f2ff; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600;">
+                        ${record.source || 'Bosque County'}
+                    </span>
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-bottom: 10px;">
+                    ${record.filed_date ? `
+                    <div>
+                        <div style="font-size: 12px; color: #666; font-weight: 600;">Filed Date</div>
+                        <div style="color: #2d3748;">${record.filed_date}</div>
+                    </div>` : ''}
+
+                    ${record.grantor ? `
+                    <div>
+                        <div style="font-size: 12px; color: #666; font-weight: 600;">Grantor</div>
+                        <div style="color: #2d3748;">${record.grantor}</div>
+                    </div>` : ''}
+
+                    ${record.grantee ? `
+                    <div>
+                        <div style="font-size: 12px; color: #666; font-weight: 600;">Grantee</div>
+                        <div style="color: #2d3748;">${record.grantee}</div>
+                    </div>` : ''}
+
+                    ${record.volume && record.page ? `
+                    <div>
+                        <div style="font-size: 12px; color: #666; font-weight: 600;">Volume/Page</div>
+                        <div style="color: #2d3748;">Vol ${record.volume}, Pg ${record.page}</div>
+                    </div>` : ''}
+                </div>
+
+                ${record.legal_description ? `
+                <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #e2e8f0;">
+                    <div style="font-size: 12px; color: #666; font-weight: 600; margin-bottom: 5px;">Legal Description</div>
+                    <div style="color: #2d3748; font-size: 14px;">${record.legal_description}</div>
+                </div>` : ''}
+
+                <button onclick="viewClerkDocument('${record.id || record.instrument_number}', '${record.source || 'texasfile'}')"
+                        style="margin-top: 10px; padding: 8px 16px; background: var(--primary); color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 600;">
+                    📄 View Full Document
+                </button>
+            </div>
+        `;
+    });
+
+    html += '</div>';
+
+    propertyDetails.innerHTML = html;
+    propertyInfo.classList.remove('hidden');
+    propertyInfo.scrollIntoView({ behavior: 'smooth' });
+}
+
+async function viewClerkDocument(documentId, source) {
+    /**
+     * View full clerk document details
+     */
+
+    const document = await getClerkDocument(documentId, source);
+
+    if (!document) {
+        return;
+    }
+
+    // Display document details in a modal or expanded view
+    alert(`Document ${documentId} retrieved. Full document viewer would display here.`);
 }
 
 // ============================================================================
