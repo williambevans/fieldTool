@@ -1,0 +1,821 @@
+{
+  "type": "FeatureCollection",
+  "metadata": {
+    "total_parcels": 29,
+    "total_acres": 61670
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -103.4918,
+          31.0156
+        ]
+      },
+      "properties": {
+        "id": "AFZ-TX-PECOS-001",
+        "name": "West Pecos Desert Ranch",
+        "county": "Pecos",
+        "state": "TX",
+        "acres": 2400,
+        "score": 85,
+        "criteria": "Marginal Land, Arid Region, Grid Access",
+        "soil_quality": "marginal",
+        "is_brownfield": false,
+        "is_arid": true,
+        "avg_rainfall": 11.5,
+        "nearest_substation": 6.2,
+        "has_grid_access": true,
+        "current_use": "grazing",
+        "elevation": 2750,
+        "notes": "High solar potential, minimal agricultural value, near transmission lines"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -103.3421,
+          30.8923
+        ]
+      },
+      "properties": {
+        "id": "AFZ-TX-PECOS-002",
+        "name": "Pecos Scrubland Tract",
+        "county": "Pecos",
+        "state": "TX",
+        "acres": 1800,
+        "score": 85,
+        "criteria": "Marginal Land, Arid Region, Grid Access",
+        "soil_quality": "marginal",
+        "is_brownfield": false,
+        "is_arid": true,
+        "avg_rainfall": 12.0,
+        "nearest_substation": 4.5,
+        "has_grid_access": true,
+        "current_use": "vacant",
+        "elevation": 2820,
+        "notes": "Desert scrubland, excellent grid access, solar farm potential"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -104.8271,
+          31.8934
+        ]
+      },
+      "properties": {
+        "id": "AFZ-TX-CULB-001",
+        "name": "Guadalupe Mountains Foothill",
+        "county": "Culberson",
+        "state": "TX",
+        "acres": 3200,
+        "score": 85,
+        "criteria": "Marginal Land, Arid Region, Grid Access",
+        "soil_quality": "marginal",
+        "is_brownfield": false,
+        "is_arid": true,
+        "avg_rainfall": 9.8,
+        "nearest_substation": 8.5,
+        "has_grid_access": true,
+        "current_use": "vacant",
+        "elevation": 3850,
+        "notes": "Very arid, rocky terrain, high elevation solar potential"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -105.1234,
+          31.6745
+        ]
+      },
+      "properties": {
+        "id": "AFZ-TX-HUDS-001",
+        "name": "Salt Flat Basin Land",
+        "county": "Hudspeth",
+        "state": "TX",
+        "acres": 5600,
+        "score": 85,
+        "criteria": "Marginal Land, Arid Region, Grid Access",
+        "soil_quality": "marginal",
+        "is_brownfield": false,
+        "is_arid": true,
+        "avg_rainfall": 8.5,
+        "nearest_substation": 12.0,
+        "has_grid_access": true,
+        "current_use": "vacant",
+        "elevation": 3600,
+        "notes": "Salt flat basin, one of driest areas in Texas, near transmission"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -95.2145,
+          29.7234
+        ]
+      },
+      "properties": {
+        "id": "AFZ-TX-HARR-BF-001",
+        "name": "East Houston Industrial Complex",
+        "county": "Harris",
+        "state": "TX",
+        "acres": 85,
+        "score": 75,
+        "criteria": "Brownfield Site, Grid Access",
+        "soil_quality": "moderate",
+        "is_brownfield": true,
+        "is_arid": false,
+        "avg_rainfall": 53.0,
+        "nearest_substation": 0.4,
+        "has_grid_access": true,
+        "current_use": "vacant",
+        "elevation": 45,
+        "notes": "Former petrochemical facility, remediated, excellent grid access"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -95.2567,
+          29.7512
+        ]
+      },
+      "properties": {
+        "id": "AFZ-TX-HARR-BF-002",
+        "name": "Ship Channel Industrial Site",
+        "county": "Harris",
+        "state": "TX",
+        "acres": 120,
+        "score": 75,
+        "criteria": "Brownfield Site, Grid Access",
+        "soil_quality": "moderate",
+        "is_brownfield": true,
+        "is_arid": false,
+        "avg_rainfall": 53.0,
+        "nearest_substation": 0.6,
+        "has_grid_access": true,
+        "current_use": "vacant",
+        "elevation": 35,
+        "notes": "Former refinery site, Phase II remediation complete, substation adjacent"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -94.1065,
+          30.0803
+        ]
+      },
+      "properties": {
+        "id": "AFZ-TX-JEFF-BF-001",
+        "name": "Beaumont Refinery Brownfield",
+        "county": "Jefferson",
+        "state": "TX",
+        "acres": 95,
+        "score": 75,
+        "criteria": "Brownfield Site, Grid Access",
+        "soil_quality": "moderate",
+        "is_brownfield": true,
+        "is_arid": false,
+        "avg_rainfall": 61.0,
+        "nearest_substation": 0.3,
+        "has_grid_access": true,
+        "current_use": "industrial",
+        "elevation": 20,
+        "notes": "Decommissioned refinery, cleanup certified, data center potential"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -99.5073,
+          27.5064
+        ]
+      },
+      "properties": {
+        "id": "AFZ-TX-WEBB-BF-001",
+        "name": "Laredo Rail Yard Brownfield",
+        "county": "Webb",
+        "state": "TX",
+        "acres": 65,
+        "score": 100,
+        "criteria": "Brownfield Site, Arid Region, Grid Access",
+        "soil_quality": "moderate",
+        "is_brownfield": true,
+        "is_arid": true,
+        "avg_rainfall": 19.5,
+        "nearest_substation": 0.9,
+        "has_grid_access": true,
+        "current_use": "vacant",
+        "elevation": 430,
+        "notes": "Former rail maintenance facility, environmental clearance obtained"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.6123,
+          31.9234
+        ]
+      },
+      "properties": {
+        "id": "AFZ-TX-BOSQ-001",
+        "name": "Meridian Rocky Ranch",
+        "county": "Bosque",
+        "state": "TX",
+        "acres": 580,
+        "score": 60,
+        "criteria": "Marginal Land, Grid Access",
+        "soil_quality": "marginal",
+        "is_brownfield": false,
+        "is_arid": false,
+        "avg_rainfall": 33.5,
+        "nearest_substation": 2.8,
+        "has_grid_access": true,
+        "current_use": "grazing",
+        "elevation": 780,
+        "notes": "Rocky limestone terrain, limited crop potential, excellent solar access"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.5734,
+          31.7845
+        ]
+      },
+      "properties": {
+        "id": "AFZ-TX-BOSQ-002",
+        "name": "Clifton Hillside Tract",
+        "county": "Bosque",
+        "state": "TX",
+        "acres": 420,
+        "score": 70,
+        "criteria": "Marginal Land, Grid Access",
+        "soil_quality": "marginal",
+        "is_brownfield": false,
+        "is_arid": false,
+        "avg_rainfall": 32.8,
+        "nearest_substation": 3.5,
+        "has_grid_access": true,
+        "current_use": "vacant",
+        "elevation": 820,
+        "notes": "Steep slopes, shallow soil, transmission line crosses property"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.7823,
+          31.1345
+        ]
+      },
+      "properties": {
+        "id": "AFZ-TX-CORY-001",
+        "name": "Fort Cavazos Perimeter Land",
+        "county": "Coryell",
+        "state": "TX",
+        "acres": 750,
+        "score": 70,
+        "criteria": "Marginal Land, Grid Access",
+        "soil_quality": "marginal",
+        "is_brownfield": false,
+        "is_arid": false,
+        "avg_rainfall": 32.0,
+        "nearest_substation": 1.2,
+        "has_grid_access": true,
+        "current_use": "military buffer",
+        "elevation": 1020,
+        "notes": "Rocky marginal land, adjacent to military base, excellent grid"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -98.1823,
+          31.0634
+        ]
+      },
+      "properties": {
+        "id": "AFZ-TX-LAMP-001",
+        "name": "Lampasas Caliche Hills",
+        "county": "Lampasas",
+        "state": "TX",
+        "acres": 640,
+        "score": 60,
+        "criteria": "Marginal Land, Grid Access",
+        "soil_quality": "marginal",
+        "is_brownfield": false,
+        "is_arid": false,
+        "avg_rainfall": 30.5,
+        "nearest_substation": 4.2,
+        "has_grid_access": true,
+        "current_use": "grazing",
+        "elevation": 1150,
+        "notes": "Heavy caliche deposits, poor soil quality, moderate grid access"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -102.3987,
+          34.8123
+        ]
+      },
+      "properties": {
+        "id": "AFZ-TX-DEAF-001",
+        "name": "Hereford Dry Cropland",
+        "county": "Deaf Smith",
+        "state": "TX",
+        "acres": 1920,
+        "score": 85,
+        "criteria": "Marginal Land, Arid Region, Grid Access",
+        "soil_quality": "marginal",
+        "is_brownfield": false,
+        "is_arid": true,
+        "avg_rainfall": 18.5,
+        "nearest_substation": 7.8,
+        "has_grid_access": true,
+        "current_use": "dryland farming",
+        "elevation": 3800,
+        "notes": "Marginal dryland farming, aquifer depletion, solar conversion candidate"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -102.5123,
+          36.0234
+        ]
+      },
+      "properties": {
+        "id": "AFZ-TX-HART-001",
+        "name": "Dalhart Arid Ranch",
+        "county": "Hartley",
+        "state": "TX",
+        "acres": 2800,
+        "score": 85,
+        "criteria": "Marginal Land, Arid Region, Grid Access",
+        "soil_quality": "marginal",
+        "is_brownfield": false,
+        "is_arid": true,
+        "avg_rainfall": 17.2,
+        "nearest_substation": 9.5,
+        "has_grid_access": true,
+        "current_use": "grazing",
+        "elevation": 3950,
+        "notes": "Arid shortgrass prairie, wind and solar potential, moderate grid distance"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -102.4278,
+          35.2434
+        ]
+      },
+      "properties": {
+        "id": "AFZ-TX-OLD-001",
+        "name": "Vega Grassland Tract",
+        "county": "Oldham",
+        "state": "TX",
+        "acres": 3400,
+        "score": 85,
+        "criteria": "Marginal Land, Arid Region, Grid Access",
+        "soil_quality": "marginal",
+        "is_brownfield": false,
+        "is_arid": true,
+        "avg_rainfall": 19.0,
+        "nearest_substation": 6.2,
+        "has_grid_access": true,
+        "current_use": "grazing",
+        "elevation": 3750,
+        "notes": "Marginal grazing land, low rainfall, renewable energy potential"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -99.8234,
+          28.6767
+        ]
+      },
+      "properties": {
+        "id": "AFZ-TX-ZAVA-001",
+        "name": "Crystal City Brushland",
+        "county": "Zavala",
+        "state": "TX",
+        "acres": 1600,
+        "score": 60,
+        "criteria": "Marginal Land, Grid Access",
+        "soil_quality": "marginal",
+        "is_brownfield": false,
+        "is_arid": false,
+        "avg_rainfall": 21.5,
+        "nearest_substation": 5.5,
+        "has_grid_access": true,
+        "current_use": "brush",
+        "elevation": 580,
+        "notes": "Dense brush, marginal agricultural value, solar farm potential"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -99.8567,
+          28.5234
+        ]
+      },
+      "properties": {
+        "id": "AFZ-TX-DIMM-001",
+        "name": "Carrizo Springs Arid Land",
+        "county": "Dimmit",
+        "state": "TX",
+        "acres": 2200,
+        "score": 60,
+        "criteria": "Marginal Land, Grid Access",
+        "soil_quality": "marginal",
+        "is_brownfield": false,
+        "is_arid": false,
+        "avg_rainfall": 20.8,
+        "nearest_substation": 8.2,
+        "has_grid_access": true,
+        "current_use": "brush",
+        "elevation": 620,
+        "notes": "Mesquite brushland, arid conditions, marginal for agriculture"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -98.6934,
+          27.3123
+        ]
+      },
+      "properties": {
+        "id": "AFZ-TX-HOGG-001",
+        "name": "Hebbronville Ranch",
+        "county": "Jim Hogg",
+        "state": "TX",
+        "acres": 4800,
+        "score": 30,
+        "criteria": "Marginal Land",
+        "soil_quality": "marginal",
+        "is_brownfield": false,
+        "is_arid": false,
+        "avg_rainfall": 23.5,
+        "nearest_substation": 11.0,
+        "has_grid_access": false,
+        "current_use": "ranch",
+        "elevation": 450,
+        "notes": "Large ranch, marginal grazing, far from grid infrastructure"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -103.4923,
+          31.4234
+        ]
+      },
+      "properties": {
+        "id": "AFZ-TX-REEV-001",
+        "name": "Pecos Industrial Brownfield",
+        "county": "Reeves",
+        "state": "TX",
+        "acres": 180,
+        "score": 100,
+        "criteria": "Marginal Land, Brownfield Site, Arid Region, Grid Access",
+        "soil_quality": "marginal",
+        "is_brownfield": true,
+        "is_arid": true,
+        "avg_rainfall": 11.2,
+        "nearest_substation": 1.8,
+        "has_grid_access": true,
+        "current_use": "industrial",
+        "elevation": 2580,
+        "notes": "Former oil field facility, remediated brownfield in arid region, excellent grid"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.2886,
+          31.7619
+        ]
+      },
+      "properties": {
+        "id": "AFZ-TX-ELPA-001",
+        "name": "El Paso East Industrial Park",
+        "county": "El Paso",
+        "state": "TX",
+        "acres": 95,
+        "score": 100,
+        "criteria": "Marginal Land, Brownfield Site, Arid Region, Grid Access",
+        "soil_quality": "marginal",
+        "is_brownfield": true,
+        "is_arid": true,
+        "avg_rainfall": 9.4,
+        "nearest_substation": 0.5,
+        "has_grid_access": true,
+        "current_use": "vacant",
+        "elevation": 3740,
+        "notes": "Remediated industrial site, extremely arid, substation adjacent"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -102.8923,
+          31.5934
+        ]
+      },
+      "properties": {
+        "id": "AFZ-TX-WARD-001",
+        "name": "Monahans Oilfield Reclamation",
+        "county": "Ward",
+        "state": "TX",
+        "acres": 240,
+        "score": 100,
+        "criteria": "Marginal Land, Brownfield Site, Arid Region, Grid Access",
+        "soil_quality": "marginal",
+        "is_brownfield": true,
+        "is_arid": true,
+        "avg_rainfall": 13.5,
+        "nearest_substation": 2.3,
+        "has_grid_access": true,
+        "current_use": "reclamation",
+        "elevation": 2650,
+        "notes": "Former drilling site, soil remediation complete, arid environment"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -103.0923,
+          31.8567
+        ]
+      },
+      "properties": {
+        "id": "AFZ-TX-WINK-001",
+        "name": "Kermit Industrial Brownfield",
+        "county": "Winkler",
+        "state": "TX",
+        "acres": 160,
+        "score": 100,
+        "criteria": "Marginal Land, Brownfield Site, Arid Region, Grid Access",
+        "soil_quality": "marginal",
+        "is_brownfield": true,
+        "is_arid": true,
+        "avg_rainfall": 14.0,
+        "nearest_substation": 1.5,
+        "has_grid_access": true,
+        "current_use": "vacant",
+        "elevation": 2710,
+        "notes": "Remediated oil & gas facility, arid climate, good grid access"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -102.5487,
+          32.3234
+        ]
+      },
+      "properties": {
+        "id": "AFZ-TX-ANDR-001",
+        "name": "Andrews Energy Corridor",
+        "county": "Andrews",
+        "state": "TX",
+        "acres": 3200,
+        "score": 95,
+        "criteria": "Marginal Land, Arid Region, Grid Access",
+        "soil_quality": "marginal",
+        "is_brownfield": false,
+        "is_arid": true,
+        "avg_rainfall": 15.5,
+        "nearest_substation": 3.8,
+        "has_grid_access": true,
+        "current_use": "energy",
+        "elevation": 3140,
+        "notes": "Marginal land along transmission corridor, arid conditions, energy infrastructure"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -102.5123,
+          31.8457
+        ]
+      },
+      "properties": {
+        "id": "AFZ-TX-ECTO-001",
+        "name": "Odessa West Tract",
+        "county": "Ector",
+        "state": "TX",
+        "acres": 1400,
+        "score": 85,
+        "criteria": "Marginal Land, Arid Region, Grid Access",
+        "soil_quality": "marginal",
+        "is_brownfield": false,
+        "is_arid": true,
+        "avg_rainfall": 14.8,
+        "nearest_substation": 4.5,
+        "has_grid_access": true,
+        "current_use": "vacant",
+        "elevation": 2890,
+        "notes": "Arid marginal land, oil & gas region infrastructure, solar potential"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -99.7331,
+          32.3489
+        ]
+      },
+      "properties": {
+        "id": "AFZ-TX-TAYL-001",
+        "name": "Abilene South Marginal Ranch",
+        "county": "Taylor",
+        "state": "TX",
+        "acres": 920,
+        "score": 60,
+        "criteria": "Marginal Land, Grid Access",
+        "soil_quality": "marginal",
+        "is_brownfield": false,
+        "is_arid": false,
+        "avg_rainfall": 24.5,
+        "nearest_substation": 5.2,
+        "has_grid_access": true,
+        "current_use": "grazing",
+        "elevation": 1710,
+        "notes": "Rocky marginal grazing land, moderate grid access"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -100.4067,
+          32.4712
+        ]
+      },
+      "properties": {
+        "id": "AFZ-TX-NOLA-001",
+        "name": "Sweetwater Wind Corridor",
+        "county": "Nolan",
+        "state": "TX",
+        "acres": 2600,
+        "score": 60,
+        "criteria": "Marginal Land, Grid Access",
+        "soil_quality": "marginal",
+        "is_brownfield": false,
+        "is_arid": false,
+        "avg_rainfall": 22.0,
+        "nearest_substation": 2.8,
+        "has_grid_access": true,
+        "current_use": "wind energy",
+        "elevation": 2160,
+        "notes": "Marginal land with existing wind farms, good grid infrastructure"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -101.9423,
+          31.2234
+        ]
+      },
+      "properties": {
+        "id": "AFZ-TX-UPTO-001",
+        "name": "Rankin Arid Rangeland",
+        "county": "Upton",
+        "state": "TX",
+        "acres": 5200,
+        "score": 85,
+        "criteria": "Marginal Land, Arid Region, Grid Access",
+        "soil_quality": "marginal",
+        "is_brownfield": false,
+        "is_arid": true,
+        "avg_rainfall": 16.5,
+        "nearest_substation": 7.5,
+        "has_grid_access": true,
+        "current_use": "grazing",
+        "elevation": 2520,
+        "notes": "Large arid ranch, marginal grazing, energy development potential"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -102.3945,
+          30.1423
+        ]
+      },
+      "properties": {
+        "id": "AFZ-TX-TERR-001",
+        "name": "Sanderson Desert Ranch",
+        "county": "Terrell",
+        "state": "TX",
+        "acres": 8400,
+        "score": 55,
+        "criteria": "Marginal Land, Arid Region",
+        "soil_quality": "marginal",
+        "is_brownfield": false,
+        "is_arid": true,
+        "avg_rainfall": 13.2,
+        "nearest_substation": 18.5,
+        "has_grid_access": false,
+        "current_use": "ranch",
+        "elevation": 2250,
+        "notes": "Very large remote ranch, extremely arid, distant from grid"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -104.0178,
+          30.3089
+        ]
+      },
+      "properties": {
+        "id": "AFZ-TX-PRES-001",
+        "name": "Marfa Plateau Arid Land",
+        "county": "Presidio",
+        "state": "TX",
+        "acres": 6800,
+        "score": 55,
+        "criteria": "Marginal Land, Arid Region",
+        "soil_quality": "marginal",
+        "is_brownfield": false,
+        "is_arid": true,
+        "avg_rainfall": 15.7,
+        "nearest_substation": 14.2,
+        "has_grid_access": false,
+        "current_use": "vacant",
+        "elevation": 4685,
+        "notes": "High desert plateau, scenic area, limited infrastructure"
+      }
+    }
+  ]
+}
