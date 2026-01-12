@@ -358,9 +358,167 @@
                 grid-template-columns: repeat(2, 1fr);
             }
         }
+
+        /* Login Screen Styles */
+        .login-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+        }
+
+        .login-box {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+        }
+
+        .login-box h2 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            font-size: 2rem;
+        }
+
+        .login-box .subtitle {
+            color: var(--text-light);
+            margin-bottom: 30px;
+            font-size: 0.95rem;
+        }
+
+        .login-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .login-input {
+            padding: 15px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .login-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .login-btn {
+            padding: 15px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+
+        .login-btn:active {
+            transform: translateY(0);
+        }
+
+        .login-error {
+            color: var(--danger-color);
+            font-size: 0.9rem;
+            margin-top: -10px;
+            display: none;
+        }
+
+        .login-error.show {
+            display: block;
+            animation: shake 0.5s;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .logout-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            background: var(--danger-color);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            z-index: 1000;
+            transition: background 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: #b71c1c;
+        }
     </style>
 </head>
 <body>
+    <!-- Login Screen -->
+    <div id="loginOverlay" class="login-overlay">
+        <div class="login-box">
+            <div class="login-icon">🔒</div>
+            <h2>AFZ Database Access</h2>
+            <p class="subtitle">Restricted Access - Password Required</p>
+
+            <form class="login-form" onsubmit="handleLogin(event)">
+                <input
+                    type="password"
+                    id="passwordInput"
+                    class="login-input"
+                    placeholder="Enter password"
+                    autocomplete="off"
+                    required
+                />
+                <div id="loginError" class="login-error">
+                    ❌ Incorrect password. Please try again.
+                </div>
+                <button type="submit" class="login-btn">
+                    🔓 Access Database
+                </button>
+            </form>
+
+            <p style="color: #999; font-size: 0.85rem; margin-top: 20px;">
+                Agriculture Freedom Zones Database<br>
+                HH Holdings / Bevans Real Estate
+            </p>
+        </div>
+    </div>
+
+    <!-- Logout Button (hidden until logged in) -->
+    <button id="logoutBtn" class="logout-btn hidden" onclick="handleLogout()">
+        🔒 Logout
+    </button>
+
     <div class="container">
         <header>
             <h1>
@@ -470,10 +628,67 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <script>
+        // Authentication Configuration
+        const CORRECT_PASSWORD = 'savage';
+        const AUTH_KEY = 'afz_authenticated';
+
         let afzData = null;
         let map = null;
         let markers = [];
         let allParcels = [];
+
+        // Check authentication on page load
+        function checkAuthentication() {
+            const isAuthenticated = sessionStorage.getItem(AUTH_KEY) === 'true';
+
+            if (isAuthenticated) {
+                // User is authenticated, show content
+                document.getElementById('loginOverlay').classList.add('hidden');
+                document.getElementById('logoutBtn').classList.remove('hidden');
+                return true;
+            } else {
+                // User is not authenticated, show login
+                document.getElementById('loginOverlay').classList.remove('hidden');
+                document.getElementById('logoutBtn').classList.add('hidden');
+                return false;
+            }
+        }
+
+        // Handle login form submission
+        function handleLogin(event) {
+            event.preventDefault();
+
+            const password = document.getElementById('passwordInput').value;
+            const errorDiv = document.getElementById('loginError');
+
+            if (password === CORRECT_PASSWORD) {
+                // Correct password
+                sessionStorage.setItem(AUTH_KEY, 'true');
+                document.getElementById('loginOverlay').classList.add('hidden');
+                document.getElementById('logoutBtn').classList.remove('hidden');
+                errorDiv.classList.remove('show');
+
+                // Initialize the application
+                initMap();
+                loadAFZData();
+            } else {
+                // Incorrect password
+                errorDiv.classList.add('show');
+                document.getElementById('passwordInput').value = '';
+                document.getElementById('passwordInput').focus();
+
+                // Remove error after animation
+                setTimeout(() => {
+                    errorDiv.classList.remove('show');
+                }, 3000);
+            }
+        }
+
+        // Handle logout
+        function handleLogout() {
+            sessionStorage.removeItem(AUTH_KEY);
+            window.location.reload();
+        }
 
         // Initialize map
         function initMap() {
@@ -719,8 +934,19 @@
 
         // Initialize on page load
         window.onload = function() {
-            initMap();
-            loadAFZData();
+            // Check authentication first
+            const isAuthenticated = checkAuthentication();
+
+            // Only initialize app if already authenticated
+            if (isAuthenticated) {
+                initMap();
+                loadAFZData();
+            }
+
+            // Focus password input if showing login
+            if (!isAuthenticated) {
+                document.getElementById('passwordInput').focus();
+            }
         };
     </script>
 </body>
