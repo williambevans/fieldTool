@@ -538,105 +538,6 @@
             color: white;
         }
 
-        /* Login Overlay Styles (for CyrusOne tab) */
-        .login-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 10000;
-        }
-
-        .login-box {
-            background: white;
-            padding: 40px;
-            border-radius: 15px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            max-width: 400px;
-            width: 90%;
-            text-align: center;
-        }
-
-        .login-box h2 {
-            color: var(--primary);
-            margin-bottom: 10px;
-            font-size: 2rem;
-        }
-
-        .login-box .subtitle {
-            color: var(--text-light);
-            margin-bottom: 30px;
-            font-size: 0.95rem;
-        }
-
-        .login-icon {
-            font-size: 4rem;
-            margin-bottom: 20px;
-        }
-
-        .login-form {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        .login-input {
-            padding: 15px;
-            border: 2px solid var(--border);
-            border-radius: 8px;
-            font-size: 1rem;
-            transition: border-color 0.3s;
-        }
-
-        .login-input:focus {
-            outline: none;
-            border-color: var(--primary);
-        }
-
-        .login-btn {
-            padding: 15px;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: transform 0.3s, box-shadow 0.3s;
-        }
-
-        .login-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
-        }
-
-        .login-btn:active {
-            transform: translateY(0);
-        }
-
-        .login-error {
-            color: var(--danger);
-            font-size: 0.9rem;
-            margin-top: -10px;
-            display: none;
-        }
-
-        .login-error.show {
-            display: block;
-            animation: shake 0.5s;
-        }
-
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-10px); }
-            75% { transform: translateX(10px); }
-        }
-
         /* CyrusOne Section Styles */
         .cyrus-section {
             animation: fadeIn 0.3s;
@@ -938,46 +839,8 @@
 
         <!-- CyrusOne Intel Tab -->
         <div id="cyrusone-tab" class="tab-content hidden">
-            <!-- Password Protection Overlay -->
-            <div id="cyrusone-login-overlay" class="login-overlay" style="display: flex;">
-                <div class="login-box">
-                    <div class="login-icon">🔒</div>
-                    <h2>CyrusOne Intelligence Access</h2>
-                    <p class="subtitle">Restricted Intelligence System - Password Required</p>
-
-                    <form class="login-form" onsubmit="handleCyrusOneLogin(event)">
-                        <input
-                            type="password"
-                            id="cyrusonePasswordInput"
-                            class="login-input"
-                            placeholder="Enter password"
-                            autocomplete="off"
-                            required
-                        />
-                        <div id="cyrusoneLoginError" class="login-error">
-                            ❌ Incorrect password. Please try again.
-                        </div>
-                        <button type="submit" class="login-btn">
-                            🔓 Access Intelligence System
-                        </button>
-                    </form>
-
-                    <p style="color: #999; font-size: 0.85rem; margin-top: 20px;">
-                        CyrusOne Texas Data Center Intelligence<br>
-                        HH Holdings / Bevans Real Estate
-                    </p>
-                </div>
-            </div>
-
-            <!-- Main Content (hidden until authenticated) -->
-            <div id="cyrusone-content" class="hidden">
-                <div class="card">
-                    <h2 style="display: flex; justify-content: space-between; align-items: center;">
-                        <span>🏢 CyrusOne Texas Data Center Intelligence & Mapping System</span>
-                        <button onclick="logoutCyrusOne()" style="padding: 8px 16px; background: #d32f2f; color: white; border: none; border-radius: 6px; font-size: 0.9em; cursor: pointer;">
-                            🔒 Logout
-                        </button>
-                    </h2>
+            <div class="card">
+                <h2>🏢 CyrusOne Texas Data Center Intelligence & Mapping System</h2>
 
                     <div style="background: linear-gradient(135deg, #1e40af, #3b82f6); color: white; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
                         <h3 style="margin-bottom: 10px;">🎯 Mission Objective</h3>
@@ -1279,7 +1142,6 @@
                     </div>
 
                 </div>
-            </div>
         </div>
 
         <!-- Database Tab -->
