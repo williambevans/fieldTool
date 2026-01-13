@@ -94,6 +94,11 @@ function showTab(tabName) {
     if (tabName === 'map') {
         initializeMap();
     }
+
+    // Check CyrusOne auth if CyrusOne tab
+    if (tabName === 'cyrusone') {
+        checkCyrusOneAuth();
+    }
 }
 
 // ============================================================================
@@ -2359,17 +2364,6 @@ function initializeCyrusOneMap() {
         `);
     });
 }
-
-// Override showTab to check CyrusOne auth
-const originalShowTab = showTab;
-showTab = function(tabName) {
-    originalShowTab(tabName);
-
-    // Check auth when CyrusOne tab is shown
-    if (tabName === 'cyrusone') {
-        checkCyrusOneAuth();
-    }
-};
 
 // ============================================================================
 // INITIALIZATION
