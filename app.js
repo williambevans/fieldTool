@@ -80,10 +80,16 @@ function showTab(tabName) {
     });
 
     // Show selected tab
-    document.getElementById(`${tabName}-tab`).classList.remove('hidden');
+    const tabElement = document.getElementById(`${tabName}-tab`);
+    if (tabElement) {
+        tabElement.classList.remove('hidden');
+    }
 
-    // Activate button
-    event.target.classList.add('active');
+    // Activate the clicked button using data-tab attribute
+    const activeButton = document.querySelector(`.tab-button[data-tab="${tabName}"]`);
+    if (activeButton) {
+        activeButton.classList.add('active');
+    }
 
     // Load sites if database tab
     if (tabName === 'database') {
