@@ -537,6 +537,121 @@
             background: var(--primary);
             color: white;
         }
+
+        /* Login Overlay Styles (for CyrusOne tab) */
+        .login-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+        }
+
+        .login-box {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+        }
+
+        .login-box h2 {
+            color: var(--primary);
+            margin-bottom: 10px;
+            font-size: 2rem;
+        }
+
+        .login-box .subtitle {
+            color: var(--text-light);
+            margin-bottom: 30px;
+            font-size: 0.95rem;
+        }
+
+        .login-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .login-input {
+            padding: 15px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .login-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .login-btn {
+            padding: 15px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+
+        .login-btn:active {
+            transform: translateY(0);
+        }
+
+        .login-error {
+            color: var(--danger);
+            font-size: 0.9rem;
+            margin-top: -10px;
+            display: none;
+        }
+
+        .login-error.show {
+            display: block;
+            animation: shake 0.5s;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        /* CyrusOne Section Styles */
+        .cyrus-section {
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
     </style>
 </head>
 <body>
@@ -564,6 +679,7 @@
             <button class="tab-button" onclick="showTab('solar')">☀️ Solar Farm</button>
             <button class="tab-button" onclick="showTab('datacenter')">🖥️ Data Center</button>
             <button class="tab-button" onclick="showTab('map')">🗺️ Map & CAD</button>
+            <button class="tab-button" onclick="showTab('cyrusone')">🏢 CyrusOne Intel</button>
             <button class="tab-button" onclick="showTab('database')">💾 Site Database</button>
         </div>
 
@@ -816,6 +932,352 @@
                     <p style="color: #999; font-size: 0.9em; margin-top: 10px;">
                         Search by Owner, Address, or Property ID | Verify all information with the Appraisal District
                     </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- CyrusOne Intel Tab -->
+        <div id="cyrusone-tab" class="tab-content hidden">
+            <!-- Password Protection Overlay -->
+            <div id="cyrusone-login-overlay" class="login-overlay" style="display: flex;">
+                <div class="login-box">
+                    <div class="login-icon">🔒</div>
+                    <h2>CyrusOne Intelligence Access</h2>
+                    <p class="subtitle">Restricted Intelligence System - Password Required</p>
+
+                    <form class="login-form" onsubmit="handleCyrusOneLogin(event)">
+                        <input
+                            type="password"
+                            id="cyrusonePasswordInput"
+                            class="login-input"
+                            placeholder="Enter password"
+                            autocomplete="off"
+                            required
+                        />
+                        <div id="cyrusoneLoginError" class="login-error">
+                            ❌ Incorrect password. Please try again.
+                        </div>
+                        <button type="submit" class="login-btn">
+                            🔓 Access Intelligence System
+                        </button>
+                    </form>
+
+                    <p style="color: #999; font-size: 0.85rem; margin-top: 20px;">
+                        CyrusOne Texas Data Center Intelligence<br>
+                        HH Holdings / Bevans Real Estate
+                    </p>
+                </div>
+            </div>
+
+            <!-- Main Content (hidden until authenticated) -->
+            <div id="cyrusone-content" class="hidden">
+                <div class="card">
+                    <h2 style="display: flex; justify-content: space-between; align-items: center;">
+                        <span>🏢 CyrusOne Texas Data Center Intelligence & Mapping System</span>
+                        <button onclick="logoutCyrusOne()" style="padding: 8px 16px; background: #d32f2f; color: white; border: none; border-radius: 6px; font-size: 0.9em; cursor: pointer;">
+                            🔒 Logout
+                        </button>
+                    </h2>
+
+                    <div style="background: linear-gradient(135deg, #1e40af, #3b82f6); color: white; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                        <h3 style="margin-bottom: 10px;">🎯 Mission Objective</h3>
+                        <p style="margin-bottom: 15px;">
+                            Comprehensive intelligence platform to map, track, and analyze all CyrusOne data center facilities across Texas through three phases:
+                        </p>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;">
+                            <div style="background: rgba(255,255,255,0.1); padding: 10px; border-radius: 6px;">
+                                🔵 <strong>Phase 1:</strong> Paperwork/Filing Stage
+                            </div>
+                            <div style="background: rgba(255,255,255,0.1); padding: 10px; border-radius: 6px;">
+                                🟡 <strong>Phase 2:</strong> Under Construction
+                            </div>
+                            <div style="background: rgba(255,255,255,0.1); padding: 10px; border-radius: 6px;">
+                                🟢 <strong>Phase 3:</strong> Operational
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Summary Stats -->
+                    <div class="results mb-20">
+                        <h3>📊 System Overview</h3>
+                        <div class="results-grid">
+                            <div class="result-item">
+                                <div class="result-label">Facilities Tracked</div>
+                                <div class="result-value" id="cyrus-total-facilities">0</div>
+                            </div>
+                            <div class="result-item">
+                                <div class="result-label">Total Power Capacity</div>
+                                <div class="result-value" id="cyrus-total-mw">0 MW</div>
+                            </div>
+                            <div class="result-item">
+                                <div class="result-label">Total Tax Abatements</div>
+                                <div class="result-value" id="cyrus-total-abatements">$0</div>
+                            </div>
+                            <div class="result-item">
+                                <div class="result-label">Counties Covered</div>
+                                <div class="result-value" id="cyrus-total-counties">0</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Navigation Pills -->
+                    <div style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
+                        <button class="btn-primary" onclick="showCyrusSection('dashboard')" id="cyrus-btn-dashboard">📊 Dashboard</button>
+                        <button class="btn-secondary" onclick="showCyrusSection('tceq')" id="cyrus-btn-tceq">🏗️ TCEQ Permits</button>
+                        <button class="btn-secondary" onclick="showCyrusSection('cad')" id="cyrus-btn-cad">🏛️ County CAD</button>
+                        <button class="btn-secondary" onclick="showCyrusSection('financials')" id="cyrus-btn-financials">💰 Financials</button>
+                        <button class="btn-secondary" onclick="showCyrusSection('map')" id="cyrus-btn-map">🗺️ Map View</button>
+                        <button class="btn-secondary" onclick="showCyrusSection('bosque')" id="cyrus-btn-bosque">📍 Bosque Investigation</button>
+                    </div>
+
+                    <!-- Dashboard Section -->
+                    <div id="cyrus-section-dashboard" class="cyrus-section">
+                        <h3>📊 Intelligence Dashboard</h3>
+
+                        <div style="background: #f7fafc; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                            <h4 style="color: var(--primary); margin-bottom: 15px;">Quick Actions</h4>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
+                                <button onclick="startTCEQScraper()" style="padding: 15px; background: white; border: 2px solid var(--primary); border-radius: 8px; cursor: pointer; text-align: left;">
+                                    <div style="font-size: 24px; margin-bottom: 5px;">🔍</div>
+                                    <strong style="display: block; color: var(--primary);">Search TCEQ Permits</strong>
+                                    <small style="color: #666;">Find construction permits statewide</small>
+                                </button>
+                                <button onclick="startCADSearch()" style="padding: 15px; background: white; border: 2px solid var(--primary); border-radius: 8px; cursor: pointer; text-align: left;">
+                                    <div style="font-size: 24px; margin-bottom: 5px;">🏛️</div>
+                                    <strong style="display: block; color: var(--primary);">Search County Records</strong>
+                                    <small style="color: #666;">Property values & abatements</small>
+                                </button>
+                                <button onclick="addNewFacility()" style="padding: 15px; background: white; border: 2px solid var(--primary); border-radius: 8px; cursor: pointer; text-align: left;">
+                                    <div style="font-size: 24px; margin-bottom: 5px;">➕</div>
+                                    <strong style="display: block; color: var(--primary);">Add Facility</strong>
+                                    <small style="color: #666;">Manual facility entry</small>
+                                </button>
+                                <button onclick="generateReport()" style="padding: 15px; background: white; border: 2px solid var(--primary); border-radius: 8px; cursor: pointer; text-align: left;">
+                                    <div style="font-size: 24px; margin-bottom: 5px;">📄</div>
+                                    <strong style="display: block; color: var(--primary);">Generate Report</strong>
+                                    <small style="color: #666;">Export PDF/Excel analysis</small>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Facility List -->
+                        <div style="background: white; padding: 20px; border-radius: 8px; border: 1px solid var(--border);">
+                            <h4 style="color: var(--primary); margin-bottom: 15px;">📋 Tracked Facilities</h4>
+                            <div id="cyrus-facility-list">
+                                <p style="text-align: center; color: #666; padding: 40px;">
+                                    No facilities tracked yet. Use the search tools above to discover CyrusOne facilities across Texas.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TCEQ Section -->
+                    <div id="cyrus-section-tceq" class="cyrus-section hidden">
+                        <h3>🏗️ TCEQ Permit Discovery</h3>
+                        <p style="color: #666; margin-bottom: 20px;">
+                            Search Texas Commission on Environmental Quality construction permits for CyrusOne facilities.
+                        </p>
+
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Entity Name</label>
+                                <select id="tceq-entity-name">
+                                    <option value="CyrusOne">CyrusOne</option>
+                                    <option value="Cyrus One">Cyrus One</option>
+                                    <option value="Bosque Parcel">Bosque Parcel</option>
+                                    <option value="Calpine Real Estate">Calpine Real Estate</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Permit Type</label>
+                                <select id="tceq-permit-type">
+                                    <option value="all">All Permits</option>
+                                    <option value="TXR150000">TXR150000 - Stormwater Construction</option>
+                                    <option value="air">Air Quality</option>
+                                    <option value="water">Water Discharge</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <button class="btn-primary" onclick="searchTCEQPermits()" style="margin-top: 15px;">
+                            🔍 Search TCEQ Database
+                        </button>
+
+                        <div id="tceq-results" class="results hidden" style="margin-top: 20px;">
+                            <h4>Search Results</h4>
+                            <div id="tceq-results-content"></div>
+                        </div>
+                    </div>
+
+                    <!-- CAD Section -->
+                    <div id="cyrus-section-cad" class="cyrus-section hidden">
+                        <h3>🏛️ County Appraisal District Search</h3>
+                        <p style="color: #666; margin-bottom: 20px;">
+                            Search property records across Texas counties for CyrusOne-owned properties.
+                        </p>
+
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>County</label>
+                                <select id="cad-county">
+                                    <option value="Bosque">Bosque County</option>
+                                    <option value="Hill">Hill County</option>
+                                    <option value="McLennan">McLennan County (Waco)</option>
+                                    <option value="Hays">Hays County (Kyle/San Marcos)</option>
+                                    <option value="Williamson">Williamson County (Round Rock)</option>
+                                    <option value="Collin">Collin County</option>
+                                    <option value="Denton">Denton County</option>
+                                    <option value="Tarrant">Tarrant County</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Owner Name</label>
+                                <input type="text" id="cad-owner" placeholder="CyrusOne Inc." value="CyrusOne">
+                            </div>
+                        </div>
+
+                        <button class="btn-primary" onclick="searchCAD()" style="margin-top: 15px;">
+                            🔍 Search County Records
+                        </button>
+
+                        <div id="cad-results" class="results hidden" style="margin-top: 20px;">
+                            <h4>Property Records</h4>
+                            <div id="cad-results-content"></div>
+                        </div>
+                    </div>
+
+                    <!-- Financials Section -->
+                    <div id="cyrus-section-financials" class="cyrus-section hidden">
+                        <h3>💰 Financial Analytics & Tax Abatements</h3>
+                        <p style="color: #666; margin-bottom: 20px;">
+                            Analyze property values, tax abatements, and economic impact across all CyrusOne facilities.
+                        </p>
+
+                        <div class="results">
+                            <h4>Aggregate Financial Data</h4>
+                            <div class="results-grid">
+                                <div class="result-item">
+                                    <div class="result-label">Total Property Value</div>
+                                    <div class="result-value" id="fin-total-value">$0</div>
+                                </div>
+                                <div class="result-item">
+                                    <div class="result-label">Total Taxable Value</div>
+                                    <div class="result-value" id="fin-taxable-value">$0</div>
+                                </div>
+                                <div class="result-item">
+                                    <div class="result-label">Annual Tax Savings</div>
+                                    <div class="result-value" id="fin-annual-savings">$0</div>
+                                </div>
+                                <div class="result-item">
+                                    <div class="result-label">10-Year Projected</div>
+                                    <div class="result-value" id="fin-10year-savings">$0</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="margin-top: 20px;">
+                            <h4>Tax Abatement Details</h4>
+                            <div id="financial-details">
+                                <p style="text-align: center; color: #666; padding: 20px;">
+                                    No financial data available. Add facilities to see tax abatement analysis.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Map Section -->
+                    <div id="cyrus-section-map" class="cyrus-section hidden">
+                        <h3>🗺️ Interactive Facility Map</h3>
+                        <p style="color: #666; margin-bottom: 20px;">
+                            View all CyrusOne facilities across Texas with status indicators and financial data.
+                        </p>
+
+                        <div style="background: #f7fafc; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                            <h4 style="margin-bottom: 10px;">Map Legend</h4>
+                            <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <div style="width: 20px; height: 20px; border-radius: 50%; background: #3b82f6;"></div>
+                                    <span>Filing/Planning Stage</span>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <div style="width: 20px; height: 20px; border-radius: 50%; background: #f59e0b;"></div>
+                                    <span>Under Construction</span>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <div style="width: 20px; height: 20px; border-radius: 50%; background: #10b981;"></div>
+                                    <span>Operational</span>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <div style="width: 20px; height: 20px; border-radius: 50%; background: #ef4444; border: 2px solid #fff;"></div>
+                                    <span>Has Tax Abatement</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="cyrus-map" style="height: 600px; border-radius: 12px;"></div>
+                    </div>
+
+                    <!-- Bosque Investigation Section -->
+                    <div id="cyrus-section-bosque" class="cyrus-section hidden">
+                        <h3>📍 Bosque County Facility Investigation</h3>
+                        <p style="color: #666; margin-bottom: 20px;">
+                            Detailed investigation into CyrusOne Bosque County facility for January 12, 2026 Commissioners Court presentation.
+                        </p>
+
+                        <div style="background: linear-gradient(135deg, #dc2626, #ef4444); color: white; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                            <h4 style="margin-bottom: 10px;">🎯 Investigation Target</h4>
+                            <p><strong>Facility:</strong> CyrusOne Bosque County Data Center</p>
+                            <p><strong>Location:</strong> NEC of FM 56 and CR 3610A, Whitney, TX</p>
+                            <p><strong>Size:</strong> 74 acres</p>
+                            <p><strong>Construction:</strong> October 2024 - October 2027</p>
+                            <p><strong>Purpose:</strong> Tax abatement compliance and transparency analysis</p>
+                        </div>
+
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Search Type</label>
+                                <select id="bosque-search-type">
+                                    <option value="property">Property Records</option>
+                                    <option value="court">Commissioners Court Minutes</option>
+                                    <option value="school">Clifton ISD Board Minutes</option>
+                                    <option value="abatement">Tax Abatement Agreements</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <button class="btn-primary" onclick="searchBosqueRecords()" style="margin-top: 15px;">
+                            🔍 Search Bosque Records
+                        </button>
+
+                        <div id="bosque-results" style="margin-top: 20px;">
+                            <div class="results">
+                                <h4>Key Investigation Questions</h4>
+                                <div style="background: white; padding: 20px; border-radius: 8px; margin-top: 15px;">
+                                    <ul style="list-style: none; padding: 0;">
+                                        <li style="padding: 10px 0; border-bottom: 1px solid var(--border);">
+                                            ❓ What is the facility's current appraised value?
+                                        </li>
+                                        <li style="padding: 10px 0; border-bottom: 1px solid var(--border);">
+                                            ❓ What tax abatement percentage was granted?
+                                        </li>
+                                        <li style="padding: 10px 0; border-bottom: 1px solid var(--border);">
+                                            ❓ What is the annual tax savings to CyrusOne?
+                                        </li>
+                                        <li style="padding: 10px 0; border-bottom: 1px solid var(--border);">
+                                            ❓ What is the annual tax revenue loss to county/school?
+                                        </li>
+                                        <li style="padding: 10px 0; border-bottom: 1px solid var(--border);">
+                                            ❓ What is the 10-year projected impact?
+                                        </li>
+                                        <li style="padding: 10px 0;">
+                                            ❓ Are all required documents publicly posted?
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
             </div>
         </div>

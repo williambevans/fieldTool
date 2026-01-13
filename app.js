@@ -1851,6 +1851,527 @@ async function viewClerkDocument(documentId, source) {
 }
 
 // ============================================================================
+// CYRUSONE INTELLIGENCE SYSTEM
+// ============================================================================
+
+// CyrusOne Authentication
+const CYRUSONE_PASSWORD = 'cia';
+const CYRUSONE_AUTH_KEY = 'cyrusone_authenticated';
+let cyrusOneMap = null;
+let cyrusOneFacilities = [];
+
+// Handle CyrusOne login
+function handleCyrusOneLogin(event) {
+    event.preventDefault();
+
+    const password = document.getElementById('cyrusonePasswordInput').value;
+    const errorDiv = document.getElementById('cyrusoneLoginError');
+
+    if (password === CYRUSONE_PASSWORD) {
+        // Correct password
+        sessionStorage.setItem(CYRUSONE_AUTH_KEY, 'true');
+        document.getElementById('cyrusone-login-overlay').style.display = 'none';
+        document.getElementById('cyrusone-content').classList.remove('hidden');
+        errorDiv.classList.remove('show');
+
+        // Initialize CyrusOne system
+        initializeCyrusOneSystem();
+    } else {
+        // Incorrect password
+        errorDiv.classList.add('show');
+        document.getElementById('cyrusonePasswordInput').value = '';
+        document.getElementById('cyrusonePasswordInput').focus();
+
+        // Remove error after animation
+        setTimeout(() => {
+            errorDiv.classList.remove('show');
+        }, 3000);
+    }
+}
+
+// Logout from CyrusOne
+function logoutCyrusOne() {
+    sessionStorage.removeItem(CYRUSONE_AUTH_KEY);
+    document.getElementById('cyrusone-login-overlay').style.display = 'flex';
+    document.getElementById('cyrusone-content').classList.add('hidden');
+    document.getElementById('cyrusonePasswordInput').value = '';
+}
+
+// Check CyrusOne authentication when tab is shown
+function checkCyrusOneAuth() {
+    const isAuthenticated = sessionStorage.getItem(CYRUSONE_AUTH_KEY) === 'true';
+
+    if (isAuthenticated) {
+        document.getElementById('cyrusone-login-overlay').style.display = 'none';
+        document.getElementById('cyrusone-content').classList.remove('hidden');
+        initializeCyrusOneSystem();
+    } else {
+        document.getElementById('cyrusone-login-overlay').style.display = 'flex';
+        document.getElementById('cyrusone-content').classList.add('hidden');
+        setTimeout(() => {
+            document.getElementById('cyrusonePasswordInput')?.focus();
+        }, 100);
+    }
+}
+
+// Initialize CyrusOne system
+function initializeCyrusOneSystem() {
+    loadCyrusOneFacilities();
+    updateCyrusOneStats();
+}
+
+// Show CyrusOne section
+function showCyrusSection(section) {
+    // Hide all sections
+    document.querySelectorAll('.cyrus-section').forEach(sec => {
+        sec.classList.add('hidden');
+    });
+
+    // Remove active from all buttons
+    document.querySelectorAll('[id^="cyrus-btn-"]').forEach(btn => {
+        btn.classList.remove('btn-primary');
+        btn.classList.add('btn-secondary');
+    });
+
+    // Show selected section
+    document.getElementById(`cyrus-section-${section}`).classList.remove('hidden');
+
+    // Activate button
+    document.getElementById(`cyrus-btn-${section}`).classList.remove('btn-secondary');
+    document.getElementById(`cyrus-btn-${section}`).classList.add('btn-primary');
+
+    // Initialize map if map section
+    if (section === 'map') {
+        setTimeout(() => initializeCyrusOneMap(), 100);
+    }
+}
+
+// Data Storage Functions
+function getCyrusOneFacilities() {
+    const facilitiesJSON = localStorage.getItem('cyrusone-facilities');
+    return facilitiesJSON ? JSON.parse(facilitiesJSON) : [];
+}
+
+function saveCyrusOneFacility(facility) {
+    const facilities = getCyrusOneFacilities();
+    facility.id = facility.id || 'CYRUS-' + Date.now();
+    facility.addedAt = facility.addedAt || new Date().toISOString();
+    facilities.push(facility);
+    localStorage.setItem('cyrusone-facilities', JSON.stringify(facilities));
+    loadCyrusOneFacilities();
+    updateCyrusOneStats();
+    return facility;
+}
+
+function loadCyrusOneFacilities() {
+    cyrusOneFacilities = getCyrusOneFacilities();
+    displayCyrusOneFacilities();
+}
+
+function displayCyrusOneFacilities() {
+    const listDiv = document.getElementById('cyrus-facility-list');
+
+    if (cyrusOneFacilities.length === 0) {
+        listDiv.innerHTML = `
+            <p style="text-align: center; color: #666; padding: 40px;">
+                No facilities tracked yet. Use the search tools above to discover CyrusOne facilities across Texas.
+            </p>
+        `;
+        return;
+    }
+
+    let html = '';
+    cyrusOneFacilities.forEach(facility => {
+        const statusColors = {
+            'filing': '#3b82f6',
+            'construction': '#f59e0b',
+            'operational': '#10b981'
+        };
+        const statusColor = statusColors[facility.status] || '#6b7280';
+
+        html += `
+            <div style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid ${statusColor};">
+                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">
+                    <div>
+                        <strong style="color: var(--primary); font-size: 16px;">${facility.name}</strong>
+                        <div style="font-size: 13px; color: #666; margin-top: 4px;">
+                            ${facility.county} County, Texas
+                        </div>
+                    </div>
+                    <span style="background: ${statusColor}; color: white; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600;">
+                        ${(facility.status || 'unknown').toUpperCase()}
+                    </span>
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-top: 10px;">
+                    ${facility.acres ? `
+                    <div>
+                        <div style="font-size: 11px; color: #666;">Acreage</div>
+                        <div style="font-weight: 600;">${facility.acres} acres</div>
+                    </div>` : ''}
+                    ${facility.powerMW ? `
+                    <div>
+                        <div style="font-size: 11px; color: #666;">Power</div>
+                        <div style="font-weight: 600;">${facility.powerMW} MW</div>
+                    </div>` : ''}
+                    ${facility.taxAbatement ? `
+                    <div>
+                        <div style="font-size: 11px; color: #666;">Tax Abatement</div>
+                        <div style="font-weight: 600; color: #ef4444;">$${facility.taxAbatement.toLocaleString()}</div>
+                    </div>` : ''}
+                </div>
+
+                <button onclick="viewFacilityDetails('${facility.id}')" style="margin-top: 10px; padding: 6px 12px; background: var(--primary); color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px;">
+                    View Details
+                </button>
+            </div>
+        `;
+    });
+
+    listDiv.innerHTML = html;
+}
+
+function updateCyrusOneStats() {
+    const facilities = getCyrusOneFacilities();
+
+    const totalFacilities = facilities.length;
+    const totalMW = facilities.reduce((sum, f) => sum + (f.powerMW || 0), 0);
+    const totalAbatements = facilities.reduce((sum, f) => sum + (f.taxAbatement || 0), 0);
+    const uniqueCounties = new Set(facilities.map(f => f.county)).size;
+
+    document.getElementById('cyrus-total-facilities').textContent = totalFacilities;
+    document.getElementById('cyrus-total-mw').textContent = totalMW.toFixed(1) + ' MW';
+    document.getElementById('cyrus-total-abatements').textContent = '$' + totalAbatements.toLocaleString();
+    document.getElementById('cyrus-total-counties').textContent = uniqueCounties;
+
+    // Update financials section
+    const totalValue = facilities.reduce((sum, f) => sum + (f.appraisedValue || 0), 0);
+    const taxableValue = facilities.reduce((sum, f) => sum + (f.taxableValue || 0), 0);
+    const annualSavings = facilities.reduce((sum, f) => sum + (f.taxAbatement || 0), 0);
+
+    document.getElementById('fin-total-value').textContent = '$' + totalValue.toLocaleString();
+    document.getElementById('fin-taxable-value').textContent = '$' + taxableValue.toLocaleString();
+    document.getElementById('fin-annual-savings').textContent = '$' + annualSavings.toLocaleString();
+    document.getElementById('fin-10year-savings').textContent = '$' + (annualSavings * 10).toLocaleString();
+}
+
+function viewFacilityDetails(facilityId) {
+    const facility = cyrusOneFacilities.find(f => f.id === facilityId);
+    if (!facility) return;
+
+    const details = `
+FACILITY DETAILS
+
+Name: ${facility.name}
+County: ${facility.county} County, Texas
+Status: ${(facility.status || 'Unknown').toUpperCase()}
+
+Property Information:
+- Acreage: ${facility.acres || 'Unknown'} acres
+- Power Capacity: ${facility.powerMW || 'Unknown'} MW
+- Construction Start: ${facility.constructionStart || 'Unknown'}
+- Construction End: ${facility.constructionEnd || 'Unknown'}
+
+Financial Data:
+- Appraised Value: $${(facility.appraisedValue || 0).toLocaleString()}
+- Taxable Value: $${(facility.taxableValue || 0).toLocaleString()}
+- Tax Abatement: $${(facility.taxAbatement || 0).toLocaleString()}/year
+- Abatement %: ${facility.abatementPercent || 0}%
+
+${facility.notes ? 'Notes:\n' + facility.notes : ''}
+
+Added: ${new Date(facility.addedAt).toLocaleDateString()}
+    `;
+
+    alert(details);
+}
+
+// Quick Action Functions
+function startTCEQScraper() {
+    showCyrusSection('tceq');
+}
+
+function startCADSearch() {
+    showCyrusSection('cad');
+}
+
+function addNewFacility() {
+    const name = prompt('Enter facility name:', 'CyrusOne [County] Data Center');
+    if (!name) return;
+
+    const county = prompt('Enter county:', 'Bosque');
+    if (!county) return;
+
+    const acres = parseFloat(prompt('Enter acreage:', '74'));
+    const powerMW = parseFloat(prompt('Enter power capacity (MW):', '100'));
+
+    const facility = {
+        name: name,
+        county: county,
+        acres: acres || 0,
+        powerMW: powerMW || 0,
+        status: 'filing',
+        constructionStart: '',
+        constructionEnd: '',
+        appraisedValue: 0,
+        taxableValue: 0,
+        taxAbatement: 0,
+        abatementPercent: 0,
+        notes: ''
+    };
+
+    saveCyrusOneFacility(facility);
+    alert(`✅ Facility "${name}" added to tracking system!`);
+}
+
+function generateReport() {
+    const facilities = getCyrusOneFacilities();
+
+    if (facilities.length === 0) {
+        alert('No facilities to export. Add facilities first.');
+        return;
+    }
+
+    // Generate CSV report
+    let csv = 'Facility Name,County,Status,Acres,Power (MW),Appraised Value,Taxable Value,Tax Abatement,Abatement %,Construction Start,Construction End,Notes\n';
+
+    facilities.forEach(f => {
+        csv += `"${f.name}","${f.county}","${f.status}",${f.acres || 0},${f.powerMW || 0},${f.appraisedValue || 0},${f.taxableValue || 0},${f.taxAbatement || 0},${f.abatementPercent || 0},"${f.constructionStart || ''}","${f.constructionEnd || '"}","${f.notes || ''}"\n`;
+    });
+
+    // Download CSV
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `cyrusone_intelligence_report_${Date.now()}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+
+    alert('✅ Report exported successfully!');
+}
+
+// TCEQ Permit Search
+function searchTCEQPermits() {
+    const entityName = document.getElementById('tceq-entity-name').value;
+    const permitType = document.getElementById('tceq-permit-type').value;
+
+    const resultsDiv = document.getElementById('tceq-results');
+    const contentDiv = document.getElementById('tceq-results-content');
+
+    contentDiv.innerHTML = `
+        <div style="padding: 20px; background: #f7fafc; border-radius: 8px;">
+            <h4 style="color: var(--primary); margin-bottom: 15px;">🔍 TCEQ Permit Search</h4>
+            <p style="color: #666; margin-bottom: 15px;">
+                Searching for: <strong>${entityName}</strong> | Permit Type: <strong>${permitType}</strong>
+            </p>
+
+            <div style="background: #fff3cd; padding: 15px; border-radius: 6px; border-left: 4px solid #ffc107; margin-bottom: 15px;">
+                <strong>⚠️ Manual Search Required</strong><br>
+                Due to website restrictions, please search the TCEQ database manually:
+            </div>
+
+            <ol style="margin-left: 20px; line-height: 1.8; color: #666;">
+                <li>Visit the <a href="https://www15.tceq.texas.gov/crpub/" target="_blank" style="color: var(--primary); font-weight: 600;">TCEQ Public Records Portal</a></li>
+                <li>Search by entity name: "${entityName}"</li>
+                <li>Filter by permit type${permitType !== 'all' ? `: ${permitType}` : ''}</li>
+                <li>Look for construction permits with:
+                    <ul style="margin-top: 5px;">
+                        <li>Facility location (lat/long)</li>
+                        <li>Acreage disturbed</li>
+                        <li>Construction timeline</li>
+                        <li>Property descriptions</li>
+                    </ul>
+                </li>
+                <li>Return here and use "Add Facility" to manually enter discovered facilities</li>
+            </ol>
+
+            <div style="margin-top: 20px; text-align: center;">
+                <a href="https://www15.tceq.texas.gov/crpub/" target="_blank" style="display: inline-block; padding: 12px 24px; background: var(--primary); color: white; text-decoration: none; border-radius: 6px; font-weight: 600;">
+                    🔗 Open TCEQ Database
+                </a>
+            </div>
+        </div>
+    `;
+
+    resultsDiv.classList.remove('hidden');
+}
+
+// County CAD Search
+function searchCAD() {
+    const county = document.getElementById('cad-county').value;
+    const owner = document.getElementById('cad-owner').value;
+
+    const resultsDiv = document.getElementById('cad-results');
+    const contentDiv = document.getElementById('cad-results-content');
+
+    const cadUrls = {
+        'Bosque': 'https://esearch.bosquecad.com/',
+        'Hill': 'https://propaccess.hillcad.org/',
+        'McLennan': 'https://esearch.mcad.org/',
+        'Hays': 'https://esearch.hayscad.com/',
+        'Williamson': 'https://propaccess.wilcad.org/',
+        'Collin': 'https://www.collincad.org/',
+        'Denton': 'https://esearch.dentoncad.com/',
+        'Tarrant': 'https://www.tad.org/'
+    };
+
+    const cadUrl = cadUrls[county] || 'https://esearch.bosquecad.com/';
+
+    contentDiv.innerHTML = `
+        <div style="padding: 20px; background: #f7fafc; border-radius: 8px;">
+            <h4 style="color: var(--primary); margin-bottom: 15px;">🏛️ ${county} County CAD Search</h4>
+            <p style="color: #666; margin-bottom: 15px;">
+                Searching for: <strong>${owner}</strong> in <strong>${county} County</strong>
+            </p>
+
+            <div style="background: #fff3cd; padding: 15px; border-radius: 6px; border-left: 4px solid #ffc107; margin-bottom: 15px;">
+                <strong>⚠️ Manual Search Required</strong><br>
+                Property records require direct access to the county appraisal district website.
+            </div>
+
+            <ol style="margin-left: 20px; line-height: 1.8; color: #666;">
+                <li>Visit the <a href="${cadUrl}" target="_blank" style="color: var(--primary); font-weight: 600;">${county} County CAD website</a></li>
+                <li>Search by owner name: "${owner}"</li>
+                <li>Look for properties with:
+                    <ul style="margin-top: 5px;">
+                        <li>Account numbers</li>
+                        <li>Legal descriptions</li>
+                        <li>Appraised values</li>
+                        <li>Taxable values (check for abatements)</li>
+                        <li>Historical value data (5+ years)</li>
+                        <li>School district boundaries</li>
+                    </ul>
+                </li>
+                <li>Record any tax abatements (zero or reduced taxable value)</li>
+                <li>Use "Add Facility" to manually enter property data</li>
+            </ol>
+
+            <div style="margin-top: 20px; text-align: center;">
+                <a href="${cadUrl}" target="_blank" style="display: inline-block; padding: 12px 24px; background: var(--primary); color: white; text-decoration: none; border-radius: 6px; font-weight: 600;">
+                    🔗 Open ${county} County CAD
+                </a>
+            </div>
+        </div>
+    `;
+
+    resultsDiv.classList.remove('hidden');
+}
+
+// Bosque County Investigation
+function searchBosqueRecords() {
+    const searchType = document.getElementById('bosque-search-type').value;
+
+    const resultsDiv = document.getElementById('bosque-results');
+
+    const urls = {
+        'property': 'https://esearch.bosquecad.com/',
+        'court': 'https://www.co.bosque.tx.us/page/bosque.Commissioners.Court',
+        'school': 'https://www.cliftonisd.net/board',
+        'abatement': 'https://www.co.bosque.tx.us/page/bosque.Economic.Development'
+    };
+
+    const searchUrl = urls[searchType] || urls['property'];
+    const searchTitle = {
+        'property': 'Property Records',
+        'court': 'Commissioners Court Minutes',
+        'school': 'Clifton ISD Board Minutes',
+        'abatement': 'Tax Abatement Agreements'
+    }[searchType];
+
+    resultsDiv.innerHTML = `
+        <div class="results" style="margin-top: 20px;">
+            <h4>🔍 ${searchTitle} Search</h4>
+            <div style="background: #f7fafc; padding: 20px; border-radius: 8px; margin-top: 15px;">
+                <p style="color: #666; margin-bottom: 15px;">
+                    Search ${searchTitle.toLowerCase()} for CyrusOne Bosque County facility information.
+                </p>
+
+                <div style="background: #e6f2ff; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
+                    <strong>📍 Facility Location:</strong> NEC of FM 56 and CR 3610A, Whitney, TX<br>
+                    <strong>📏 Size:</strong> 74 acres<br>
+                    <strong>🏗️ Construction:</strong> October 2024 - October 2027<br>
+                    <strong>🏢 Entities:</strong> Bosque Parcel 2 LLC, CyrusOne Inc., Calpine Real Estate
+                </div>
+
+                <div style="margin-top: 20px; text-align: center;">
+                    <a href="${searchUrl}" target="_blank" style="display: inline-block; padding: 12px 24px; background: var(--primary); color: white; text-decoration: none; border-radius: 6px; font-weight: 600;">
+                        🔗 Search ${searchTitle}
+                    </a>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// Initialize CyrusOne Map
+function initializeCyrusOneMap() {
+    if (cyrusOneMap) {
+        cyrusOneMap.invalidateSize();
+        return;
+    }
+
+    const mapDiv = document.getElementById('cyrus-map');
+    if (!mapDiv) return;
+
+    // Create map centered on Texas
+    cyrusOneMap = L.map('cyrus-map').setView([31.5, -99.5], 6);
+
+    // Add OpenStreetMap tiles
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors',
+        maxZoom: 19
+    }).addTo(cyrusOneMap);
+
+    // Add facilities to map
+    const facilities = getCyrusOneFacilities();
+
+    facilities.forEach(facility => {
+        if (!facility.latitude || !facility.longitude) return;
+
+        const statusColors = {
+            'filing': '#3b82f6',
+            'construction': '#f59e0b',
+            'operational': '#10b981'
+        };
+        const color = statusColors[facility.status] || '#6b7280';
+
+        const marker = L.circleMarker([facility.latitude, facility.longitude], {
+            radius: 10,
+            fillColor: color,
+            color: facility.taxAbatement > 0 ? '#ef4444' : 'white',
+            weight: facility.taxAbatement > 0 ? 3 : 2,
+            opacity: 1,
+            fillOpacity: 0.8
+        }).addTo(cyrusOneMap);
+
+        marker.bindPopup(`
+            <div style="min-width: 200px;">
+                <strong style="color: var(--primary);">${facility.name}</strong><br>
+                <strong>County:</strong> ${facility.county}<br>
+                <strong>Status:</strong> ${(facility.status || 'Unknown').toUpperCase()}<br>
+                <strong>Acres:</strong> ${facility.acres || 'Unknown'}<br>
+                <strong>Power:</strong> ${facility.powerMW || 'Unknown'} MW<br>
+                ${facility.taxAbatement > 0 ? `<strong style="color: #ef4444;">Tax Abatement:</strong> $${facility.taxAbatement.toLocaleString()}/year<br>` : ''}
+            </div>
+        `);
+    });
+}
+
+// Override showTab to check CyrusOne auth
+const originalShowTab = showTab;
+showTab = function(tabName) {
+    originalShowTab(tabName);
+
+    // Check auth when CyrusOne tab is shown
+    if (tabName === 'cyrusone') {
+        checkCyrusOneAuth();
+    }
+};
+
+// ============================================================================
 // INITIALIZATION
 // ============================================================================
 
@@ -1858,4 +2379,5 @@ async function viewClerkDocument(documentId, source) {
 window.addEventListener('DOMContentLoaded', () => {
     console.log('🦅 EAGLE - Energy Infrastructure Intelligence loaded');
     console.log('HH Holdings / Bevans Real Estate | Bosque County, Texas');
+    console.log('🏢 CyrusOne Intelligence Module loaded');
 });
