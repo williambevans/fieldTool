@@ -101,9 +101,9 @@ function showTab(tabName) {
         initializeMap();
     }
 
-    // Check CyrusOne auth if CyrusOne tab
+    // Initialize CyrusOne if CyrusOne tab
     if (tabName === 'cyrusone') {
-        checkCyrusOneAuth();
+        initializeCyrusOneSystem();
     }
 }
 
@@ -1865,65 +1865,9 @@ async function viewClerkDocument(documentId, source) {
 // CYRUSONE INTELLIGENCE SYSTEM
 // ============================================================================
 
-// CyrusOne Authentication
-const CYRUSONE_PASSWORD = 'cia';
-const CYRUSONE_AUTH_KEY = 'cyrusone_authenticated';
+// CyrusOne Data
 let cyrusOneMap = null;
 let cyrusOneFacilities = [];
-
-// Handle CyrusOne login
-function handleCyrusOneLogin(event) {
-    event.preventDefault();
-
-    const password = document.getElementById('cyrusonePasswordInput').value;
-    const errorDiv = document.getElementById('cyrusoneLoginError');
-
-    if (password === CYRUSONE_PASSWORD) {
-        // Correct password
-        sessionStorage.setItem(CYRUSONE_AUTH_KEY, 'true');
-        document.getElementById('cyrusone-login-overlay').style.display = 'none';
-        document.getElementById('cyrusone-content').classList.remove('hidden');
-        errorDiv.classList.remove('show');
-
-        // Initialize CyrusOne system
-        initializeCyrusOneSystem();
-    } else {
-        // Incorrect password
-        errorDiv.classList.add('show');
-        document.getElementById('cyrusonePasswordInput').value = '';
-        document.getElementById('cyrusonePasswordInput').focus();
-
-        // Remove error after animation
-        setTimeout(() => {
-            errorDiv.classList.remove('show');
-        }, 3000);
-    }
-}
-
-// Logout from CyrusOne
-function logoutCyrusOne() {
-    sessionStorage.removeItem(CYRUSONE_AUTH_KEY);
-    document.getElementById('cyrusone-login-overlay').style.display = 'flex';
-    document.getElementById('cyrusone-content').classList.add('hidden');
-    document.getElementById('cyrusonePasswordInput').value = '';
-}
-
-// Check CyrusOne authentication when tab is shown
-function checkCyrusOneAuth() {
-    const isAuthenticated = sessionStorage.getItem(CYRUSONE_AUTH_KEY) === 'true';
-
-    if (isAuthenticated) {
-        document.getElementById('cyrusone-login-overlay').style.display = 'none';
-        document.getElementById('cyrusone-content').classList.remove('hidden');
-        initializeCyrusOneSystem();
-    } else {
-        document.getElementById('cyrusone-login-overlay').style.display = 'flex';
-        document.getElementById('cyrusone-content').classList.add('hidden');
-        setTimeout(() => {
-            document.getElementById('cyrusonePasswordInput')?.focus();
-        }, 100);
-    }
-}
 
 // Initialize CyrusOne system
 function initializeCyrusOneSystem() {
