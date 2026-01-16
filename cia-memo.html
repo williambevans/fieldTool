@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DECLASSIFIED - CyrusOne Intelligence Memo</title>
+    <title>DECLASSIFIED - C.A.I. Intelligence Memo</title>
     <style>
         * {
             margin: 0;
@@ -162,6 +162,27 @@
             letter-spacing: 1px;
         }
 
+        .cai-seal {
+            text-align: center;
+            margin: 20px 0;
+            padding: 15px;
+            border: 4px double #000;
+            background: rgba(0,0,0,0.02);
+        }
+
+        .cai-seal-inner {
+            font-size: 18px;
+            font-weight: bold;
+            letter-spacing: 5px;
+            line-height: 1.8;
+        }
+
+        .cai-seal-tagline {
+            font-size: 9px;
+            letter-spacing: 3px;
+            margin-top: 5px;
+        }
+
         .classification-bottom {
             text-align: center;
             font-weight: bold;
@@ -316,10 +337,20 @@
                 [REDACTED] / DECLASSIFIED
             </div>
 
-            <!-- CIA Header -->
+            <!-- C.A.I. Header -->
             <div class="header">
-                <h1>CENTRAL INTELLIGENCE AGENCY</h1>
+                <h1>CITIZENS ARTIFICIAL INTELLIGENCE</h1>
                 <div class="directorate">DIRECTORATE OF <span class="redacted">████████</span></div>
+            </div>
+
+            <!-- C.A.I. Seal -->
+            <div class="cai-seal">
+                <div class="cai-seal-inner">
+                    ═══ C.A.I. ═══
+                </div>
+                <div class="cai-seal-tagline">
+                    CITIZENS ARTIFICIAL INTELLIGENCE
+                </div>
             </div>
 
             <!-- Memo Header -->
@@ -480,9 +511,10 @@
     <!-- IP Address Modal -->
     <div class="ip-modal" id="ipModal">
         <div class="ip-modal-content">
-            <h2>◈ SURVEILLANCE ACTIVE ◈</h2>
+            <h2>◈ C.A.I. SURVEILLANCE ACTIVE ◈</h2>
             <p style="font-size: 14px; color: #FFF; margin-bottom: 20px;">
-                YOUR NETWORK IDENTIFIER HAS BEEN LOGGED
+                YOUR NETWORK IDENTIFIER HAS BEEN LOGGED<br>
+                <span style="font-size: 11px; color: #999;">CITIZENS ARTIFICIAL INTELLIGENCE</span>
             </p>
 
             <div class="ip-display" id="ipAddress">
@@ -602,8 +634,8 @@
         });
 
         // Log access attempt
-        console.log('%c⚠ SURVEILLANCE NOTICE ⚠', 'color: red; font-size: 20px; font-weight: bold;');
-        console.log('%cThis document access has been logged.', 'color: red; font-size: 14px;');
+        console.log('%c⚠ C.A.I. SURVEILLANCE NOTICE ⚠', 'color: red; font-size: 20px; font-weight: bold;');
+        console.log('%cThis document access has been logged by Citizens Artificial Intelligence.', 'color: red; font-size: 14px;');
         console.log('%cTimestamp: ' + new Date().toISOString(), 'color: yellow; font-size: 12px;');
     </script>
 </body>
