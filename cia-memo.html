@@ -143,6 +143,29 @@
             user-select: none;
             padding: 0 3px;
             letter-spacing: 0;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .redacted:hover {
+            background: #333;
+        }
+
+        .redacted.revealed {
+            background: transparent;
+            color: #00FF00;
+            cursor: default;
+            font-weight: bold;
+        }
+
+        .redacted.revealed::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #00FF00;
         }
 
         .footer {
@@ -307,6 +330,85 @@
             letter-spacing: 2px;
         }
 
+        /* Password Modal for Redactions */
+        .password-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 3000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .password-modal.show {
+            display: flex;
+        }
+
+        .password-modal-content {
+            background: #1a1a1a;
+            border: 3px solid #00FF00;
+            padding: 40px;
+            max-width: 500px;
+            text-align: center;
+            font-family: 'Courier New', Courier, monospace;
+            color: #00FF00;
+        }
+
+        .password-modal-content h2 {
+            font-size: 18px;
+            letter-spacing: 3px;
+            margin-bottom: 20px;
+            color: #00FF00;
+        }
+
+        .password-modal-content input {
+            width: 100%;
+            padding: 12px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 14px;
+            border: 2px solid #00FF00;
+            margin: 15px 0;
+            background: #000;
+            color: #00FF00;
+        }
+
+        .password-modal-content button {
+            padding: 12px 30px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 14px;
+            background: #00FF00;
+            color: #000;
+            border: none;
+            cursor: pointer;
+            margin: 5px;
+            letter-spacing: 1px;
+            font-weight: bold;
+        }
+
+        .password-modal-content button:hover {
+            background: #00CC00;
+        }
+
+        .password-modal-content .cancel {
+            background: #666;
+            color: #FFF;
+        }
+
+        .password-error {
+            color: #FF0000;
+            font-size: 12px;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .password-error.show {
+            display: block;
+        }
+
         @media (max-width: 768px) {
             .document {
                 padding: 30px 20px;
@@ -340,7 +442,7 @@
             <!-- C.A.I. Header -->
             <div class="header">
                 <h1>CITIZENS ARTIFICIAL INTELLIGENCE</h1>
-                <div class="directorate">DIRECTORATE OF <span class="redacted">████████</span></div>
+                <div class="directorate">DIRECTORATE OF <span class="redacted" data-secret="OPERATIONS">████████</span></div>
             </div>
 
             <!-- C.A.I. Seal -->
@@ -355,13 +457,13 @@
 
             <!-- Memo Header -->
             <div class="memo-header">
-                <div><span class="label">MEMORANDUM FOR:</span><span class="redacted">███████████████</span></div>
+                <div><span class="label">MEMORANDUM FOR:</span><span class="redacted" data-secret="DIRECTOR - PUBLIC OVERSIGHT">███████████████</span></div>
                 <div><span class="label">FROM:</span>ECONOMIC ANALYSIS DIVISION</div>
                 <div><span class="label">SUBJECT:</span>Foreign Investment in Critical Infrastructure</div>
                 <div style="margin-left: 140px;">CyrusOne Data Center Development - Bosque County, TX</div>
-                <div><span class="label">DATE:</span><span class="redacted">██</span> October 2024</div>
-                <div><span class="label">DOC CONTROL:</span><span class="redacted">████-████-███</span></div>
-                <div><span class="label">CLASSIFICATION:</span>[REDACTED] / DECLASSIFIED <span class="redacted">████████</span></div>
+                <div><span class="label">DATE:</span><span class="redacted" data-secret="04">██</span> October 2024</div>
+                <div><span class="label">DOC CONTROL:</span><span class="redacted" data-secret="CAI-2024-1004">████-████-███</span></div>
+                <div><span class="label">CLASSIFICATION:</span>[REDACTED] / DECLASSIFIED <span class="redacted" data-secret="16 JAN 2026">████████</span></div>
             </div>
 
             <div class="divider"></div>
@@ -369,8 +471,8 @@
             <!-- Executive Summary -->
             <div class="section-header">EXECUTIVE SUMMARY</div>
             <div class="body-text">
-                Intelligence indicates <span class="redacted">████████████</span> corporate entity CYRUSONE INC.
-                has initiated construction of <span class="redacted">█████████</span> facility designated "DFW10"
+                Intelligence indicates <span class="redacted" data-secret="multinational">████████████</span> corporate entity CYRUSONE INC.
+                has initiated construction of <span class="redacted" data-secret="hyperscale data center">█████████</span> facility designated "DFW10"
                 in BOSQUE COUNTY, TEXAS. Project timeline: OCT 2024 - DEC 2027.
             </div>
             <div class="body-text indent">
@@ -385,13 +487,13 @@
                 Primary actors identified:
             </div>
             <div class="body-text indent">
-                CyrusOne Inc. (Owner/Operator) - <span class="redacted">███████████</span><br>
-                Bosque Parcel 2, LLC (Delaware entity, formed <span class="redacted">████████</span>)<br>
+                CyrusOne Inc. (Owner/Operator) - <span class="redacted" data-secret="KKR Infrastructure">███████████</span><br>
+                Bosque Parcel 2, LLC (Delaware entity, formed <span class="redacted" data-secret="March 2023">████████</span>)<br>
                 Calpine Real Estate Data Center Holdings, LLC<br>
-                Address: 717 Texas Avenue, Suite 1000, Houston, TX <span class="redacted">██████</span>
+                Address: 717 Texas Avenue, Suite 1000, Houston, TX <span class="redacted" data-secret="77002">██████</span>
             </div>
             <div class="body-text">
-                <span class="redacted">████████████████████████████</span>
+                <span class="redacted" data-secret="Foreign investment stake: 23%">████████████████████████████</span>
             </div>
             <div class="body-text indent">
                 Financial relationships: [REDACTED]<br>
@@ -403,20 +505,20 @@
             <div class="body-text">
                 <strong>General Contractor:</strong> CLUNE CONSTRUCTION<br>
                 Signatory: Kevin Morris<br>
-                Role: <span class="redacted">████████████████</span>
+                Role: <span class="redacted" data-secret="Project Executive">████████████████</span>
             </div>
             <div class="body-text">
                 <strong>Primary Site Operator:</strong> F.A. PEINADO, LLC<br>
                 Customer Number: CN603801911<br>
-                Texas SOS Filing: <span class="redacted">████████</span><br>
-                Federal Tax ID: <span class="redacted">███████████</span><br>
+                Texas SOS Filing: <span class="redacted" data-secret="802658942">████████</span><br>
+                Federal Tax ID: <span class="redacted" data-secret="47-3892615">███████████</span><br>
                 Contact: James A. Cordes (VP)<br>
-                Payment processed: $225.00 via <span class="redacted">████████</span>
+                Payment processed: $225.00 via <span class="redacted" data-secret="electronic">████████</span>
             </div>
             <div class="body-text">
                 <strong>Environmental Compliance:</strong> ENVIROSERVE<br>
                 Inspector: Jeremy Boucher<br>
-                Phone: <span class="redacted">███-███-████</span>
+                Phone: <span class="redacted" data-secret="512-555-0147">███-███-████</span>
             </div>
 
             <!-- Environmental Permits -->
@@ -428,7 +530,7 @@
                 Discharge location: BRAZOS RIVER BELOW LAKE WHITNEY<br>
                 Segment: 1257<br>
                 Municipal coordination: CITY OF WHITNEY (MS4 Operator)<br>
-                Storm water management: <span class="redacted">████████████████████████</span><br>
+                Storm water management: <span class="redacted" data-secret="32 retention ponds, 8.5M gallons">████████████████████████</span><br>
                 Concrete washout: AUTHORIZED<br>
                 Edwards Aquifer impact: NEGATIVE
             </div>
@@ -436,36 +538,36 @@
             <!-- Strategic Assessment -->
             <div class="section-header">STRATEGIC ASSESSMENT</div>
             <div class="body-text">
-                Project represents <span class="redacted">████████████</span> investment in <span class="redacted">████████</span> corridor
-                infrastructure. Location selection indicates <span class="redacted">███████████████</span>
-                proximity to <span class="redacted">████████</span> transmission infrastructure and <span class="redacted">████████</span>
+                Project represents <span class="redacted" data-secret="$800M estimated">████████████</span> investment in <span class="redacted" data-secret="AI compute">████████</span> corridor
+                infrastructure. Location selection indicates <span class="redacted" data-secret="strategic access">███████████████</span>
+                proximity to <span class="redacted" data-secret="ERCOT grid">████████</span> transmission infrastructure and <span class="redacted" data-secret="dark fiber">████████</span>
                 fiber networks.
             </div>
             <div class="body-text">
-                Construction timeline suggests <span class="redacted">████████████████████████████</span>
+                Construction timeline suggests <span class="redacted" data-secret="expedited priority status">████████████████████████████</span>
                 operational capacity by Q4 2027.
             </div>
             <div class="body-text indent">
-                Tax abatement value: [REDACTED - SEE APPENDIX <span class="redacted">██</span>]<br>
+                Tax abatement value: [REDACTED - SEE APPENDIX <span class="redacted" data-secret="C">██</span>]<br>
                 Local economic impact: [REDACTED]
             </div>
 
             <!-- Intelligence Gaps -->
             <div class="section-header">INTELLIGENCE GAPS</div>
             <div class="body-text">
-                <span class="redacted">████████████████████████████████████████████</span><br>
-                Actual capital investment figures (reported: <span class="redacted">████████</span>)<br>
-                <span class="redacted">████████████████████████████████████████████</span><br>
+                <span class="redacted" data-secret="Power demand exceeds 200MW - source unknown">████████████████████████████████████████████</span><br>
+                Actual capital investment figures (reported: <span class="redacted" data-secret="$450M underestimate">████████</span>)<br>
+                <span class="redacted" data-secret="Primary client believed to be DOD contractor">████████████████████████████████████████████</span><br>
                 Foreign investment component: UNDER INVESTIGATION<br>
-                <span class="redacted">████████████████████████████████████████████</span>
+                <span class="redacted" data-secret="Fiber link to Fort Cavazos confirmed">████████████████████████████████████████████</span>
             </div>
 
             <!-- Recommendations -->
             <div class="section-header">RECOMMENDATIONS</div>
             <div class="body-text">
-                Continue monitoring <span class="redacted">████████████████████████████████████████</span><br>
-                <span class="redacted">██████████████████████████████████████████████████████████</span><br>
-                Public accountability mechanisms appear <span class="redacted">███████████████████</span>
+                Continue monitoring <span class="redacted" data-secret="foreign capital flows and ownership">████████████████████████████████████████</span><br>
+                <span class="redacted" data-secret="Recommend CFIUS review given proximity to military installations">██████████████████████████████████████████████████████████</span><br>
+                Public accountability mechanisms appear <span class="redacted" data-secret="insufficient">███████████████████</span>
             </div>
 
             <div class="divider"></div>
@@ -474,18 +576,18 @@
             <div class="body-text">
                 <strong>ATTACHMENTS:</strong><br>
                 Appendix A: TCEQ Permit Documentation (20 pages)<br>
-                Appendix B: <span class="redacted">████████████████</span> [REDACTED]<br>
+                Appendix B: <span class="redacted" data-secret="Financial Analysis">████████████████</span> [REDACTED]<br>
                 Appendix C: Corporate Structure Analysis [REDACTED]<br>
-                Appendix <span class="redacted">██</span>: <span class="redacted">████████████████████</span>
+                Appendix <span class="redacted" data-secret="D">██</span>: <span class="redacted" data-secret="SIGINT Summary">████████████████████</span>
             </div>
 
             <div class="body-text" style="margin-top: 20px;">
-                DISTRIBUTION: <span class="redacted">████████████████████████████████</span>
+                DISTRIBUTION: <span class="redacted" data-secret="Public Record / Open Source">████████████████████████████████</span>
             </div>
 
             <div class="body-text" style="margin-top: 15px;">
-                DECLASSIFIED: Authority <span class="redacted">████████████</span><br>
-                Date: <span class="redacted">████████</span>
+                DECLASSIFIED: Authority <span class="redacted" data-secret="EO 13526">████████████</span><br>
+                Date: <span class="redacted" data-secret="16 JAN 2026">████████</span>
             </div>
 
             <!-- Footer -->
@@ -494,10 +596,10 @@
                     [CLASSIFICATION MARKING]
                 </div>
                 <div style="text-align: center; margin-top: 15px;">
-                    <span class="stamp">PAGE 1 OF <span class="redacted">█</span></span>
+                    <span class="stamp">PAGE 1 OF <span class="redacted" data-secret="3">█</span></span>
                 </div>
                 <div style="text-align: center; margin-top: 10px; font-size: 10px;">
-                    HANDLE VIA <span class="redacted">██████</span> CHANNELS ONLY
+                    HANDLE VIA <span class="redacted" data-secret="PUBLIC">██████</span> CHANNELS ONLY
                 </div>
             </div>
 
@@ -536,6 +638,22 @@
             </div>
 
             <button class="close-btn" onclick="closeIPModal()">ACKNOWLEDGED</button>
+        </div>
+    </div>
+
+    <!-- Password Modal for Redactions -->
+    <div class="password-modal" id="passwordModal">
+        <div class="password-modal-content">
+            <h2>◈ CLASSIFIED ACCESS REQUIRED ◈</h2>
+            <p style="font-size: 12px; color: #FFF; margin-bottom: 10px;">
+                Enter authorization code to reveal classified information
+            </p>
+            <input type="password" id="passwordInput" placeholder="Enter code..." autocomplete="off">
+            <div class="password-error" id="passwordError">ACCESS DENIED - INVALID CODE</div>
+            <div>
+                <button onclick="checkRedactionPassword()">SUBMIT</button>
+                <button class="cancel" onclick="closePasswordModal()">CANCEL</button>
+            </div>
         </div>
     </div>
 
@@ -637,6 +755,70 @@
         console.log('%c⚠ C.A.I. SURVEILLANCE NOTICE ⚠', 'color: red; font-size: 20px; font-weight: bold;');
         console.log('%cThis document access has been logged by Citizens Artificial Intelligence.', 'color: red; font-size: 14px;');
         console.log('%cTimestamp: ' + new Date().toISOString(), 'color: yellow; font-size: 12px;');
+
+        // Redaction Password System
+        let currentRedaction = null;
+
+        // Add click listeners to all redacted elements
+        document.querySelectorAll('.redacted').forEach(element => {
+            if (!element.classList.contains('revealed')) {
+                element.addEventListener('click', function(e) {
+                    e.stopPropagation(); // Prevent triggering IP modal
+                    currentRedaction = this;
+                    document.getElementById('passwordModal').classList.add('show');
+                    document.getElementById('passwordInput').value = '';
+                    document.getElementById('passwordError').classList.remove('show');
+                    document.getElementById('passwordInput').focus();
+                });
+            }
+        });
+
+        // Enter key in password input
+        document.getElementById('passwordInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                checkRedactionPassword();
+            }
+        });
+
+        function checkRedactionPassword() {
+            const password = document.getElementById('passwordInput').value;
+
+            if (password.toLowerCase() === 'osanna') {
+                // Reveal the redacted content in terminal green
+                if (currentRedaction) {
+                    const secret = currentRedaction.getAttribute('data-secret');
+                    currentRedaction.textContent = secret;
+                    currentRedaction.classList.add('revealed');
+                    currentRedaction.style.cursor = 'default';
+                    // Remove click listener
+                    currentRedaction.replaceWith(currentRedaction.cloneNode(true));
+                }
+                closePasswordModal();
+            } else {
+                // Show error
+                document.getElementById('passwordError').classList.add('show');
+                document.getElementById('passwordInput').value = '';
+            }
+        }
+
+        function closePasswordModal() {
+            document.getElementById('passwordModal').classList.remove('show');
+            currentRedaction = null;
+        }
+
+        // Close password modal on outside click
+        document.getElementById('passwordModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closePasswordModal();
+            }
+        });
+
+        // Escape key to close password modal
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closePasswordModal();
+            }
+        });
     </script>
 </body>
 </html>
