@@ -409,6 +409,89 @@
             display: block;
         }
 
+        /* Navigation Menu */
+        .nav-menu {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 4000;
+        }
+
+        .nav-toggle {
+            background: #000;
+            color: #FFF;
+            border: 2px solid #000;
+            padding: 10px 15px;
+            font-size: 24px;
+            cursor: pointer;
+            font-family: 'Courier New', Courier, monospace;
+            letter-spacing: 5px;
+            transition: all 0.3s;
+        }
+
+        .nav-toggle:hover {
+            background: #333;
+            border-color: #00FF00;
+            color: #00FF00;
+        }
+
+        .nav-dropdown {
+            position: absolute;
+            top: 50px;
+            right: 0;
+            background: #000;
+            border: 3px solid #00FF00;
+            min-width: 300px;
+            display: none;
+            box-shadow: 0 0 20px rgba(0,255,0,0.3);
+        }
+
+        .nav-dropdown.show {
+            display: block;
+        }
+
+        .nav-dropdown-header {
+            padding: 15px;
+            border-bottom: 2px solid #00FF00;
+            color: #00FF00;
+            font-size: 12px;
+            letter-spacing: 2px;
+            font-weight: bold;
+        }
+
+        .nav-dropdown a {
+            display: block;
+            padding: 15px;
+            color: #FFF;
+            text-decoration: none;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 13px;
+            border-bottom: 1px solid #333;
+            transition: all 0.3s;
+        }
+
+        .nav-dropdown a:hover {
+            background: #00FF00;
+            color: #000;
+            padding-left: 25px;
+        }
+
+        .nav-dropdown a.active {
+            background: #1a1a1a;
+            color: #00FF00;
+            border-left: 4px solid #00FF00;
+        }
+
+        .nav-dropdown a::before {
+            content: '▸ ';
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .nav-dropdown a:hover::before {
+            opacity: 1;
+        }
+
         @media (max-width: 768px) {
             .document {
                 padding: 30px 20px;
@@ -428,10 +511,44 @@
                 font-size: 24px;
                 letter-spacing: 4px;
             }
+
+            .nav-menu {
+                top: 10px;
+                right: 10px;
+            }
+
+            .nav-toggle {
+                padding: 8px 12px;
+                font-size: 20px;
+            }
+
+            .nav-dropdown {
+                min-width: 250px;
+                right: -10px;
+            }
+
+            .nav-dropdown a {
+                font-size: 12px;
+                padding: 12px;
+            }
         }
     </style>
 </head>
 <body>
+    <!-- Navigation Menu -->
+    <div class="nav-menu">
+        <button class="nav-toggle" id="navToggle" onclick="toggleNav()">⋮</button>
+        <div class="nav-dropdown" id="navDropdown">
+            <div class="nav-dropdown-header">
+                ◈ C.A.I. NAVIGATION ◈
+            </div>
+            <a href="index.html">🏠 Main Landing Page</a>
+            <a href="cia-memo.html" class="active">🕵️ C.A.I. Declassified Memo</a>
+            <a href="afz-viewer.html">🌾 Agriculture Freedom Zones</a>
+            <a href="texas-solar-landing.html">☀️ Texas Solar Partnership</a>
+        </div>
+    </div>
+
     <div class="document" id="mainDocument">
         <div class="content">
             <!-- Classification Header -->
@@ -818,6 +935,27 @@
             if (e.key === 'Escape') {
                 closePasswordModal();
             }
+        });
+
+        // Navigation Menu Toggle
+        function toggleNav() {
+            const dropdown = document.getElementById('navDropdown');
+            dropdown.classList.toggle('show');
+        }
+
+        // Close nav dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            const navMenu = document.querySelector('.nav-menu');
+            const navDropdown = document.getElementById('navDropdown');
+
+            if (!navMenu.contains(e.target) && navDropdown.classList.contains('show')) {
+                navDropdown.classList.remove('show');
+            }
+        });
+
+        // Prevent nav toggle from triggering document click (IP modal)
+        document.getElementById('navToggle').addEventListener('click', function(e) {
+            e.stopPropagation();
         });
     </script>
 </body>
