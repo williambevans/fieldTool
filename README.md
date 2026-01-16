@@ -1,6 +1,6 @@
 # fieldTool - HH Holdings Intelligence & Analysis Suite
 
-**Owner:** Biri Bevan | **Company:** HH Holdings / Bevans Real Estate | **Location:** Bosque County, Texas
+**Owner:** William H. Bevans Jr. | **Company:** HH Holdings / Bevans Real Estate | **Location:** Bosque County, Texas
 
 A comprehensive suite of intelligence analysis tools for property research, energy infrastructure, and public data transparency.
 
