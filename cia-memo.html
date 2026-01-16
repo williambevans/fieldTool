@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DECLASSIFIED - CyrusOne Intelligence Memo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            background: #F8F6F0;
+            color: #000;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .document {
+            max-width: 850px;
+            margin: 0 auto;
+            background: #FFF;
+            padding: 60px;
+            box-shadow: 0 0 30px rgba(0,0,0,0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Declassified watermark */
+        .document::before {
+            content: 'DECLASSIFIED';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-35deg);
+            font-size: 120px;
+            font-weight: bold;
+            color: rgba(255, 0, 0, 0.08);
+            letter-spacing: 20px;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .classification {
+            text-align: center;
+            font-weight: bold;
+            font-size: 14px;
+            margin-bottom: 5px;
+            letter-spacing: 2px;
+        }
+
+        .top-secret {
+            background: #000;
+            color: #FFF;
+            padding: 5px;
+            display: inline-block;
+        }
+
+        .header {
+            text-align: center;
+            margin: 20px 0;
+            border-top: 3px solid #000;
+            border-bottom: 3px solid #000;
+            padding: 15px 0;
+        }
+
+        .header h1 {
+            font-size: 18px;
+            font-weight: bold;
+            letter-spacing: 3px;
+            margin-bottom: 5px;
+        }
+
+        .header .directorate {
+            font-size: 14px;
+            letter-spacing: 2px;
+        }
+
+        .memo-header {
+            margin: 25px 0;
+            font-size: 13px;
+        }
+
+        .memo-header div {
+            margin: 5px 0;
+        }
+
+        .label {
+            display: inline-block;
+            width: 120px;
+            font-weight: bold;
+        }
+
+        .divider {
+            border-top: 1px solid #000;
+            margin: 20px 0;
+        }
+
+        .section-header {
+            font-weight: bold;
+            font-size: 14px;
+            letter-spacing: 2px;
+            margin: 25px 0 15px 0;
+            text-decoration: underline;
+        }
+
+        .body-text {
+            font-size: 13px;
+            margin: 10px 0;
+            text-align: justify;
+        }
+
+        .indent {
+            margin-left: 20px;
+        }
+
+        /* Redaction styling */
+        .redacted {
+            background: #000;
+            color: #000;
+            cursor: pointer;
+            display: inline-block;
+            position: relative;
+            user-select: none;
+            padding: 0 2px;
+            transition: background 0.3s;
+        }
+
+        .redacted:hover {
+            background: #333;
+        }
+
+        .redacted.revealed {
+            background: transparent;
+            color: #000;
+            cursor: default;
+        }
+
+        .redacted.revealed::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #FF0000;
+        }
+
+        /* Password modal */
+        .password-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .password-modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #FFF;
+            padding: 40px;
+            border: 3px solid #000;
+            max-width: 500px;
+            text-align: center;
+        }
+
+        .modal-content h2 {
+            font-size: 16px;
+            letter-spacing: 2px;
+            margin-bottom: 20px;
+        }
+
+        .modal-content input {
+            width: 100%;
+            padding: 12px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 14px;
+            border: 2px solid #000;
+            margin: 15px 0;
+            background: #F8F6F0;
+        }
+
+        .modal-content button {
+            padding: 12px 30px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 14px;
+            background: #000;
+            color: #FFF;
+            border: none;
+            cursor: pointer;
+            margin: 5px;
+            letter-spacing: 1px;
+        }
+
+        .modal-content button:hover {
+            background: #333;
+        }
+
+        .modal-content .cancel {
+            background: #666;
+        }
+
+        .error-message {
+            color: #FF0000;
+            font-size: 12px;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .footer {
+            margin-top: 40px;
+            font-size: 11px;
+            border-top: 1px solid #000;
+            padding-top: 15px;
+        }
+
+        .stamp {
+            display: inline-block;
+            border: 2px solid #000;
+            padding: 5px 10px;
+            margin: 10px 0;
+            font-weight: bold;
+            font-size: 11px;
+        }
+
+        @media (max-width: 768px) {
+            .document {
+                padding: 30px 20px;
+            }
+
+            .document::before {
+                font-size: 60px;
+            }
+
+            .modal-content {
+                margin: 20px;
+                padding: 25px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="document">
+        <div class="content">
+            <!-- Classification Header -->
+            <div class="classification">
+                <span class="top-secret">TOP SECRET // <span class="redacted" data-secret="NOFORN">███████</span> // DECLASSIFIED</span>
+            </div>
+
+            <!-- CIA Header -->
+            <div class="header">
+                <h1>CENTRAL INTELLIGENCE AGENCY</h1>
+                <div class="directorate">DIRECTORATE OF <span class="redacted" data-secret="INTELLIGENCE">████████████</span></div>
+            </div>
+
+            <!-- Memo Header -->
+            <div class="memo-header">
+                <div><span class="label">MEMORANDUM FOR:</span><span class="redacted" data-secret="DIRECTOR OF NATIONAL INTELLIGENCE">███████████████████████████</span></div>
+                <div><span class="label">FROM:</span>ECONOMIC ANALYSIS DIVISION</div>
+                <div><span class="label">SUBJECT:</span>Foreign Investment in Critical Infrastructure<br>
+                    <span style="margin-left: 120px;">CyrusOne Data Center Development - Bosque County, TX</span></div>
+                <div><span class="label">DATE:</span><span class="redacted" data-secret="17">██</span> October 2024</div>
+                <div><span class="label">DOC CONTROL:</span><span class="redacted" data-secret="CIA-2024-8742">████-████-████</span></div>
+                <div><span class="label">CLASSIFICATION:</span><span class="redacted" data-secret="TOP SECRET">███████████</span> / DECLASSIFIED <span class="redacted" data-secret="15 JAN 2026">███████████</span></div>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Executive Summary -->
+            <div class="section-header">EXECUTIVE SUMMARY</div>
+            <div class="body-text">
+                Intelligence indicates <span class="redacted" data-secret="multinational">████████████</span> corporate entity CYRUSONE INC. has initiated construction of <span class="redacted" data-secret="hyperscale data center">█████████████████████</span> facility designated "DFW10" in BOSQUE COUNTY, TEXAS. Project timeline: OCT 2024 - DEC 2027.
+            </div>
+            <div class="body-text indent">
+                Total land disturbance: 74 acres<br>
+                Coordinates: 31.8518°N, 97.3715°W<br>
+                Location: NEC FM 56 and CR 3610A, Whitney, TX
+            </div>
+
+            <!-- Corporate Structure -->
+            <div class="section-header">CORPORATE STRUCTURE ANALYSIS</div>
+            <div class="body-text">
+                Primary actors identified:
+            </div>
+            <div class="body-text indent">
+                • CyrusOne Inc. (Owner/Operator) - <span class="redacted" data-secret="KKR Infrastructure ownership 73%">████████████████████████████</span><br>
+                • Bosque Parcel 2, LLC (Delaware entity, formed <span class="redacted" data-secret="March 2023">██████████</span>)<br>
+                • Calpine Real Estate Data Center Holdings, LLC<br>
+                • Address: 717 Texas Avenue, Suite 1000, Houston, TX <span class="redacted" data-secret="77002">█████</span>
+            </div>
+            <div class="body-text">
+                <span class="redacted" data-secret="Saudi Arabia Public Investment Fund holds 23% stake via intermediary">████████████████████████████████████████████████████████████████</span>
+            </div>
+            <div class="body-text indent">
+                Financial relationships: <span class="redacted" data-secret="$2.3B acquisition by KKR (2020)">██████████████████████████</span><br>
+                Tax incentive agreements: <span class="redacted" data-secret="15-year property tax abatement, estimated $127M value">███████████████████████████████████████████████</span>
+            </div>
+
+            <!-- Contractor Network -->
+            <div class="section-header">CONTRACTOR NETWORK</div>
+            <div class="body-text">
+                <strong>General Contractor:</strong> CLUNE CONSTRUCTION<br>
+                Signatory: Kevin Morris<br>
+                Role: <span class="redacted" data-secret="Project Executive, Critical Infrastructure Division">████████████████████████████████████████████</span>
+            </div>
+            <div class="body-text">
+                <strong>Primary Site Operator:</strong> F.A. PEINADO, LLC<br>
+                Customer Number: CN603801911<br>
+                Texas SOS Filing: <span class="redacted" data-secret="802658942-1">███████████</span><br>
+                Federal Tax ID: <span class="redacted" data-secret="47-3892615">███████████</span><br>
+                Contact: James A. Cordes (VP)<br>
+                Payment processed: $225.00 via <span class="redacted" data-secret="electronic transfer">██████████████</span>
+            </div>
+            <div class="body-text">
+                <strong>Environmental Compliance:</strong> ENVIROSERVE<br>
+                Inspector: Jeremy Boucher<br>
+                Phone: <span class="redacted" data-secret="512-555-0147">███-███-████</span>
+            </div>
+
+            <!-- Environmental Permits -->
+            <div class="section-header">ENVIRONMENTAL PERMITS & DISCHARGE</div>
+            <div class="body-text indent">
+                TCEQ Permit: TXR150000 (Storm Water General Permit)<br>
+                Effective Date: 04 October 2024<br>
+                Authorization: TXR15<br>
+                Discharge location: BRAZOS RIVER BELOW LAKE WHITNEY<br>
+                Segment: 1257<br>
+                Municipal coordination: CITY OF WHITNEY (MS4 Operator)<br>
+                Storm water management: <span class="redacted" data-secret="32 retention ponds, 8.5M gallon capacity">████████████████████████████████████</span><br>
+                Concrete washout: AUTHORIZED<br>
+                Edwards Aquifer impact: NEGATIVE
+            </div>
+
+            <!-- Strategic Assessment -->
+            <div class="section-header">STRATEGIC ASSESSMENT</div>
+            <div class="body-text">
+                Project represents <span class="redacted" data-secret="$800M estimated">█████████████</span> investment in <span class="redacted" data-secret="AI compute">████████</span> corridor infrastructure. Location selection indicates <span class="redacted" data-secret="strategic access to">███████████████</span> proximity to <span class="redacted" data-secret="ERCOT grid">████████</span> transmission infrastructure and <span class="redacted" data-secret="dark fiber">████████</span> fiber networks.
+            </div>
+            <div class="body-text">
+                Construction timeline suggests <span class="redacted" data-secret="expedited national security priority status">████████████████████████████████████████████</span> operational capacity by Q4 2027.
+            </div>
+            <div class="body-text indent">
+                Tax abatement value: <span class="redacted" data-secret="SEE APPENDIX C - FISCAL IMPACT ANALYSIS">██████████████████████████████████████</span><br>
+                Local economic impact: <span class="redacted" data-secret="147 permanent jobs, avg wage $87K">████████████████████████████████</span>
+            </div>
+
+            <!-- Intelligence Gaps -->
+            <div class="section-header">INTELLIGENCE GAPS</div>
+            <div class="body-text">
+                <span class="redacted" data-secret="Power consumption projections exceed 200MW - source unknown">████████████████████████████████████████████████████████████</span><br>
+                Actual capital investment figures (reported: <span class="redacted" data-secret="$450M underestimate">████████████████</span>)<br>
+                <span class="redacted" data-secret="Client anchor tenant believed to be DOD contractor">████████████████████████████████████████████████████████</span><br>
+                Foreign investment component: UNDER INVESTIGATION<br>
+                <span class="redacted" data-secret="Fiber connectivity to Fort Hood (now Fort Cavazos) confirmed">████████████████████████████████████████████████████████████</span>
+            </div>
+
+            <!-- Recommendations -->
+            <div class="section-header">RECOMMENDATIONS</div>
+            <div class="body-text">
+                Continue monitoring <span class="redacted" data-secret="foreign capital flows and beneficial ownership structures">████████████████████████████████████████████████████████</span><br>
+                <span class="redacted" data-secret="Recommend CFIUS review of KKR/PIF investment arrangement given proximity to military installations">██████████████████████████████████████████████████████████████████████████████████████████████</span><br>
+                Public accountability mechanisms appear <span class="redacted" data-secret="insufficient for project of this strategic significance">███████████████████████████████████████████████████</span>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Attachments -->
+            <div class="body-text">
+                <strong>ATTACHMENTS:</strong><br>
+                Appendix A: TCEQ Permit Documentation (20 pages)<br>
+                Appendix B: <span class="redacted" data-secret="Financial Flow Analysis">████████████████████████</span> [REDACTED]<br>
+                Appendix C: Corporate Structure Analysis [REDACTED]<br>
+                Appendix <span class="redacted" data-secret="D">██</span>: <span class="redacted" data-secret="Signals Intelligence Summary">████████████████████████████</span>
+            </div>
+
+            <div class="body-text" style="margin-top: 20px;">
+                DISTRIBUTION: <span class="redacted" data-secret="DNI, NSA, DHS, CISA, FBI Counterintelligence">████████████████████████████████████████████</span>
+            </div>
+
+            <div class="body-text" style="margin-top: 15px;">
+                DECLASSIFIED: Authority <span class="redacted" data-secret="EO 13526">████████████</span><br>
+                Date: <span class="redacted" data-secret="15 JAN 2026">████████</span>
+            </div>
+
+            <!-- Footer -->
+            <div class="footer">
+                <div class="classification">
+                    <span class="top-secret">TOP SECRET // <span class="redacted" data-secret="NOFORN">███████</span></span>
+                </div>
+                <div style="text-align: center; margin-top: 10px;">
+                    <span class="stamp">PAGE 1 OF <span class="redacted" data-secret="3">█</span></span>
+                </div>
+                <div style="text-align: center; margin-top: 10px; font-size: 10px;">
+                    HANDLE VIA <span class="redacted" data-secret="SPECAT">██████</span> CHANNELS ONLY
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Password Modal -->
+    <div class="password-modal" id="passwordModal">
+        <div class="modal-content">
+            <h2>CLASSIFIED INFORMATION ACCESS</h2>
+            <p>This information is classified. Enter authorization code to reveal.</p>
+            <input type="password" id="passwordInput" placeholder="Enter authorization code...">
+            <div class="error-message" id="errorMessage">ACCESS DENIED - INVALID CODE</div>
+            <div>
+                <button onclick="checkPassword()">SUBMIT</button>
+                <button class="cancel" onclick="closeModal()">CANCEL</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentRedaction = null;
+
+        // Add click listeners to all redacted elements
+        document.querySelectorAll('.redacted').forEach(element => {
+            if (!element.classList.contains('revealed')) {
+                element.addEventListener('click', function() {
+                    currentRedaction = this;
+                    document.getElementById('passwordModal').classList.add('show');
+                    document.getElementById('passwordInput').value = '';
+                    document.getElementById('errorMessage').classList.remove('show');
+                    document.getElementById('passwordInput').focus();
+                });
+            }
+        });
+
+        // Enter key in password input
+        document.getElementById('passwordInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                checkPassword();
+            }
+        });
+
+        function checkPassword() {
+            const password = document.getElementById('passwordInput').value;
+
+            if (password.toLowerCase() === 'jesus') {
+                // Reveal the redacted content
+                if (currentRedaction) {
+                    const secret = currentRedaction.getAttribute('data-secret');
+                    currentRedaction.textContent = secret;
+                    currentRedaction.classList.add('revealed');
+                    currentRedaction.style.cursor = 'default';
+                }
+                closeModal();
+            } else {
+                // Show error
+                document.getElementById('errorMessage').classList.add('show');
+                document.getElementById('passwordInput').value = '';
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('passwordModal').classList.remove('show');
+            currentRedaction = null;
+        }
+
+        // Close modal on outside click
+        document.getElementById('passwordModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+
+        // Escape key to close
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>
